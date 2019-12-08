@@ -1,3 +1,5 @@
+[TOC]
+
 ## apk签名的作用
 
 1. 无缝省级。签名作为每个app的唯一id, 和package name绑定。具有相同package name的app在系统中对应了唯一的签名，先入为主。不同签名相同package name的app在后来安装则会被拒绝。
