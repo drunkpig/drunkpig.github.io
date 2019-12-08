@@ -1,4 +1,4 @@
-![](img/systemd-logo.gif)
+![](systemd-logo.gif)
 
 
 
@@ -10,7 +10,7 @@
 
 ## 架构
 
-![](img/systemd-arch.png)
+![](systemd-arch.png)
 
 
 
