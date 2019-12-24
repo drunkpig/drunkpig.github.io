@@ -63,7 +63,7 @@ api-key哪里来的，看下图：
 ```bash
 #!/bin/bash
 ips=`/sbin/ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addrs"` 
-ip_array=(ips) #转为数组，ip可能有好几个
+ip_array=($ips) #转为数组，ip可能有好几个
 ip_1=${ip_array[0]} #选第一个ip, 如果要指定的就修改脚本吧
 curl -4 "https://pc.mkmerich.com:<my-ip-key>@dyn.dns.he.net/nic/update?hostname=pc.mkmerich.com&myip=${ip_1}"
 
