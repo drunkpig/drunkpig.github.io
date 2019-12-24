@@ -45,7 +45,7 @@ curl -4 "https://<your-sub-domain>:<api-key>@dyn.dns.he.net/nic/update?hostname=
 2) 强制指定机器的ip, 如果你想局域网里用域名也成为现实
 
 ```bash
-curl -4 "https://<your-sub-domain>:<api-key>@dyn.dns.he.net/nic/update?hostname=<your-sub-domain>&myip=192.168.2.3"
+curl  "https://<your-sub-domain>:<api-key>@dyn.dns.he.net/nic/update?hostname=<your-sub-domain>&myip=192.168.2.3"
 ```
 
 
