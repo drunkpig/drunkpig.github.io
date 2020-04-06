@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>jupyternotebook配置远程访问</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">jupyternotebook配置远程访问</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <h3 id="jupyter-notebook">jupyter notebook 配置远程访问</h3>
+<ol>
+<li>
+<p><code>$ jupyter notebook --generate-config</code>    生成了一个 <code>~/.jupyter/jupyter_notebook_config.py</code></p>
+</li>
+<li>
+<p>设置密码    <code>$ jupyter notebook password</code></p>
+</li>
+<li>
+<p>配置远程访问</p>
+</li>
+</ol>
+<p><code>bash
+   #把前面的#去掉
+   c.NotebookApp.ip = '*'    #允许所有ip访问  补充:报错 No address associated with hostname可设置为:'0.0.0.0'
+   c.NotebookApp.open_browser = False    #不打开浏览器
+   c.NotebookApp.port = 8888             #端口为8888
+   c.NotebookApp.allow_remote_access = True # 这个开关一定要打开，否则会得到空的IP</code></p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#jupyter-notebook">jupyter notebook 配置远程访问</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.org/jscrapy/jscrapy.github.io'>__BUILD_VERSION__</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
