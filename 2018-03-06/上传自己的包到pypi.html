@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>上传自己的包到pypi</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">上传自己的包到pypi</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <h2 id="pypi">上传自己的包到pypi</h2>
+<h3 id="_1">工程结构</h3>
+<div class="codehilite"><pre><span></span>/project
+  /module_A
+    __init__.py
+    xxx.py
+  setup.py
+  LICENSE
+  README.md
+  requirements.txt
+  MANIFEST.in
+</pre></div>
+
+
+<ul>
+<li>setup.py 后面详细说</li>
+<li>LICENSE 采用的开源协议</li>
+<li>README.md 在setup.py里可以读取这个文件作为在pypi上的介绍页面的内容，看了setup.py内容之后发现从任何文件读都可以，不一定是README.md。</li>
+<li>requirements.txt 项目的依赖库</li>
+<li>MANIFEST.in  打包为sdist（源码包）的时候要包含或者排除哪些文件，可以根据语法写在里面。<a href="https://docs.python.org/2/distutils/sourcedist.html#the-manifest-in-template">官方文档</a></li>
+</ul>
+<h4 id="setuppy">setup.py</h4>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">setuptools</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;README.md&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">long_description</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="n">setuptools</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fear-quant-lib&quot;</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span>
+    <span class="n">author</span><span class="o">=</span><span class="s2">&quot;goldencold&quot;</span><span class="p">,</span>
+    <span class="n">author_email</span><span class="o">=</span><span class="s2">&quot;xuchaoo@gmail.com&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;quant fear of market&quot;</span><span class="p">,</span>
+    <span class="n">long_description</span><span class="o">=</span><span class="n">long_description</span><span class="p">,</span>
+    <span class="n">long_description_content_type</span><span class="o">=</span><span class="s2">&quot;text/markdown&quot;</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://github.com/jscrapy/quantlib&quot;</span><span class="p">,</span>
+    <span class="n">packages</span><span class="o">=</span><span class="n">setuptools</span><span class="o">.</span><span class="n">find_packages</span><span class="p">(),</span>
+    <span class="n">classifiers</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;Programming Language :: Python :: 3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;License :: OSI Approved :: MIT License&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Operating System :: OS Independent&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">install_requires</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;sqlalchemy&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;python-dateutil&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;python-levenshtein&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;requests&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">python_requires</span><span class="o">=</span><span class="s1">&#39;&gt;=3.7&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+
+<h3 id="_2">打包过程</h3>
+<ol>
+<li><code>python setup.py check</code>  检查有没有错误</li>
+<li><code>python setup.py sdist bdist_wheel</code>     sdist是源码包，bdist_wheel 是预编译好的包，两者同时存在的情况下pip优先选择wheel</li>
+<li><code>twine upload dist/*</code> 上传打好的包，会让你输入pypi的用户密码， twine如果没有，要用pip安装一下。</li>
+</ol>
+<h3 id="_3">其他问题</h3>
+<ol>
+<li>如何不上传只是把打包好的文件安装到本地库里</li>
+</ol>
+<blockquote>
+<p>python setup.py install</p>
+</blockquote>
+<ol>
+<li>如何更新本地库？</li>
+</ol>
+<blockquote>
+<p>pip install --upgrade module-name</p>
+</blockquote>
+<h3 id="_4">参考文献</h3>
+<ol>
+<li><a href="http://wsfdl.com/python/2015/09/06/Python%E5%BA%94%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E5%92%8C%E5%8F%91%E5%B8%83%E4%B8%8A.html">http://wsfdl.com/python/2015/09/06/Python%E5%BA%94%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E5%92%8C%E5%8F%91%E5%B8%83%E4%B8%8A.html</a></li>
+<li><a href="http://wsfdl.com/python/2015/09/08/Python%E5%BA%94%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E5%92%8C%E5%8F%91%E5%B8%83%E4%B8%8B.html">http://wsfdl.com/python/2015/09/08/Python%E5%BA%94%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E5%92%8C%E5%8F%91%E5%B8%83%E4%B8%8B.html</a></li>
+</ol>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#pypi">上传自己的包到pypi</a><ul>
+<li><a href="#_1">工程结构</a><ul>
+<li><a href="#setuppy">setup.py</a></li>
+</ul>
+</li>
+<li><a href="#_2">打包过程</a></li>
+<li><a href="#_3">其他问题</a></li>
+<li><a href="#_4">参考文献</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.org/drunkpig/drunkpig.github.io'>2020-05-02 13:23:10</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
