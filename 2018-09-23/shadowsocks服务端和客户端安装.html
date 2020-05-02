@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>shadowsocks服务端和客户端安装</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">shadowsocks服务端和客户端安装</h1>
+            <div class="tags_container">
+                
+                <span>标签：</span>
+                
+                <a class="tag" href="../tags/tag_shadowsocks.html">shadowsocks</a>
+                
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#server">server配置</a></li>
+<li><a href="#client">client配置</a></li>
+</ul>
+</div>
+<h2 id="server">server配置</h2>
+<ol>
+<li><code>$sudo apt install shadowsocks-libev</code></li>
+<li><code>$sudo vim /etc/shadowsocks-libev/config.json</code></li>
+</ol>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;server&quot;</span><span class="o">:</span><span class="s2">&quot;&lt;your-public-ip&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;server_port&quot;</span><span class="o">:&lt;</span><span class="nx">your</span><span class="o">-</span><span class="nx">port</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;password&quot;</span><span class="o">:</span><span class="s2">&quot;&lt;your-password&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timeout&quot;</span><span class="o">:</span><span class="mi">60</span><span class="p">,</span>
+    <span class="s2">&quot;method&quot;</span><span class="o">:</span><span class="s2">&quot;chacha20-ietf-poly1305|aes-128-gcm|aes-192-gcm|aes-256-gcm|chacha20-ietf-poly1305|xchacha20-ietf-poly1305&quot;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<ol>
+<li><code>#systemctl start shadowsocks-libev.service</code></li>
+</ol>
+<h2 id="client">client配置</h2>
+<ol>
+<li><code>$sudo apt install shadowsocks-libev</code></li>
+<li><code>$sudo vim /etc/shadowsocks-libev/config.json</code></li>
+</ol>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;server&quot;</span><span class="o">:</span><span class="s2">&quot;&lt;your-public-ip&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;server_port&quot;</span><span class="o">:&lt;</span><span class="nx">your</span><span class="o">-</span><span class="nx">server</span><span class="o">-</span><span class="nx">port</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;local_port&quot;</span><span class="o">:&lt;</span><span class="nx">local</span><span class="o">-</span><span class="nx">proxy</span><span class="o">-</span><span class="nx">port</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;password&quot;</span><span class="o">:</span><span class="s2">&quot;&lt;your-password&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timeout&quot;</span><span class="o">:</span><span class="mi">60</span><span class="p">,</span>
+    <span class="s2">&quot;method&quot;</span><span class="o">:</span><span class="s2">&quot;&lt;same-to-server-method&gt;&quot;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<ol>
+<li><code>#ss-local</code></li>
+</ol>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#server">server配置</a></li>
+<li><a href="#client">client配置</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.org/jscrapy/jscrapy.github.io'>__BUILD_VERSION__</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
