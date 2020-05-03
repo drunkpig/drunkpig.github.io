@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Android APK重打包签名</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">Android APK重打包签名</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#apk">apk签名的作用</a></li>
+<li><a href="#_1">签名的步骤</a><ul>
+<li><a href="#_2">整体步骤</a></li>
+<li><a href="#_3">用到的工具</a></li>
+</ul>
+</li>
+<li><a href="#_4">再来说签名</a><ul>
+<li><a href="#_5">常见错误</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 id="apk">apk签名的作用</h2>
+<ol>
+<li>
+<p>无缝省级。签名作为每个app的唯一id, 和package name绑定。具有相同package name的app在系统中对应了唯一的签名，先入为主。不同签名相同package name的app在后来安装则会被拒绝。</p>
+</li>
+<li>
+<p>安全考虑。运行时刻代码中动态校验自己打包的签名和代码中签名是否一致。</p>
+</li>
+<li>
+<p>应用模块化。Android允许<strong>多个有同一个签名的应用程序</strong>在一个进程内运行。这样应用可以以模块方式独立省级，而应用也可以以模块方式独立部署。</p>
+</li>
+<li>
+<p>相同签名的APP可以共享数据。</p>
+</li>
+</ol>
+<h2 id="_1">签名的步骤</h2>
+<h3 id="_2">整体步骤</h3>
+<ol>
+<li>使用java自带的keytool创建key</li>
+<li>使用1中创建的key对apk签名</li>
+<li>使用zipalign 对签名之后的apk进行优化</li>
+</ol>
+<h3 id="_3">用到的工具</h3>
+<p>使用到的3个工具为：</p>
+<ol>
+<li>
+<p><strong>keytool</strong> 位于<code>$JDK_HOME/jre/bin</code></p>
+</li>
+<li>
+<p><strong>jarsigner</strong> 位于 $JDK_HOME/bin下。也可以用Android SDK自带的<strong>apksign.jar</strong>。另外一个比较优秀的商业化公司开发的<a href="http://apk.aq.163.com/apkpack.do#download"><strong>Apksigner</strong></a></p>
+</li>
+<li>
+<p><strong>zipalign</strong> 需要另外安装</p>
+</li>
+</ol>
+<p>### 具体操作</p>
+<ol>
+<li><code>keytool -genkey -alias demo.keystore -keyalg RSA -validity 40000 -keystore demo.keystore</code></li>
+</ol>
+<p>说明：</p>
+<p>-genkey 产生芈月</p>
+<p>-alias demo.keystore 设置别名</p>
+<p>-keyalg RSA 使用RSA算法对签名加密</p>
+<p>-validity 40000 有效期40000天</p>
+<p>-keystore demo.keystore 产生文件名字</p>
+<ol>
+<li><code>jarsigner -verbose -keystore demo.keystore -signedjar demo_signed.apk demo.apk demo.keystore</code></li>
+</ol>
+<p>说明：</p>
+<p>-verbose 输出过程日志</p>
+<p>-keystore demo.keystore 密钥库路径</p>
+<p>-signedjar demo_signed.apk demo.apk demo.keystore 三个参数中依次为签名后产生的文件demo_signed，要签名的文件demo.apk和密钥库demo.keystore</p>
+<ol>
+<li><code>zipalign -v 4 demo_signed.apk final.apk</code></li>
+</ol>
+<p>zipalign让apk文件未压缩的数据在4个字节的边界上对其，这样Android就能够用nmap()啊含糊在读取文件上获取更高的性能。</p>
+<h2 id="_4">再来说签名</h2>
+<p>假如你有一个宏伟的战略工程，想在生活，服务，游戏，系统各个领域都做一个独立的APP，谷歌建议你把你所有的APP都使用同一个签名证书。
+　　 使用你自己的同一个签名证书，就没有人能够覆盖你的应用程序，即使包名相同，所以影响有：</p>
+<ol>
+<li><strong>App升级</strong>。 使用相同签名的升级软件可以正常覆盖老版本的软件，否则系统比较发现新版本的签名证书和老版本的签名证书不一致，不会允许新版本安装成功的。</li>
+<li><strong>App模块化</strong>。android系统允许具有相同的App运行在同一个进程中，如果运行在同一个进程中，则他们相当于同一个App，但是你可以单独对他们升级更新，这是一种App级别的模块化思路。</li>
+<li><strong>允许代码和数据共享</strong>。android中提供了一个基于签名的Permission标签。通过允许的设置，我们可以实现对不同App之间的访问和共享。</li>
+</ol>
+<blockquote>
+<p><strong>基于签名的Permission标签</strong></p>
+<p>其中protectionLevel标签有4种值：normal(缺省值),dangerous, signature,signatureOrSystem。简单来说，normal是低风险的，所有的App不能访问和共享此App。dangerous是高风险的，所有的App都能访问和共享此App。signature是指具有相同签名的App可以访问和共享此App。signatureOrSystem是指系统image中App和具有相同签名的App可以访问和共享此App，谷歌建议不要使用这个选项，因为签名就足够了，一般这个许可会被用在在一个image中需要共享一些特定的功能的情况下。</p>
+</blockquote>
+<h3 id="_5">常见错误</h3>
+<hr />
+<div class="codehilite"><pre><span></span><span class="err">无法对 jar 进行签名: java.util.zip.ZipException: invalid entry compressed size (expected 1368 but got 1379 bytes)</span>
+</pre></div>
+
+
+<p>尝试删除apk里的META-INF</p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#apk">apk签名的作用</a></li>
+<li><a href="#_1">签名的步骤</a><ul>
+<li><a href="#_2">整体步骤</a></li>
+<li><a href="#_3">用到的工具</a></li>
+</ul>
+</li>
+<li><a href="#_4">再来说签名</a><ul>
+<li><a href="#_5">常见错误</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.org/drunkpig/drunkpig.github.io'>__BUILD_VERSION__</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
