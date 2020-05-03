@@ -11,10 +11,10 @@ branches:
     - master
 
 install:
-  - pip install -r requirements.txt
+  - pip install mdwiki
   - sudo snap install tree
 
 script:
-  - bash publish.sh
+  - mdpub
 
 
