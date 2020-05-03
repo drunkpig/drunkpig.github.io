@@ -11,7 +11,7 @@ branches:
     - master
 
 install:
-  - pip install mdwiki
+  - pip install -U mdwiki
   - sudo snap install tree
 
 script:
