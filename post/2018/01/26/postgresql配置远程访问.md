@@ -4,7 +4,7 @@
 ### 配置可原创访问
 1. 修改 /etc/postgresql/10/main/pg_hba.conf
 
-   ```ini
+   ```bash
    # DO NOT DISABLE!
    # If you change this first entry you will need to make sure that the
    # database superuser can access the database using some other method.
