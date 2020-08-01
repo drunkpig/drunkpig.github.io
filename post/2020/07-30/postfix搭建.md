@@ -11,7 +11,7 @@ apt remove sendmail
 
 ### 安装postfix
 ```bash
-apt install postfix
+sudo apt-get install libsasl2-modules postfix sasl2-bin
 
 ```
 
@@ -59,12 +59,12 @@ smtpd_sasl_security_options = noanonymous
 
 首先安装`saslauthd`
 
-然后编辑 `/etc/sasl2/smtpd.conf`
+然后编辑 `/usr/lib/sasl2/smtpd.conf`
 
 ```ini
-pwcheck_method: auxprop
-auxprop_plugin: sasldb
-mech_list: plain login CRAM-MD5 DIGEST-MD5
+pwcheck_method: saslauthd
+#auxprop_plugin: sasldb
+mech_list: PLAIN LOGIN
 
 ```
 
@@ -89,9 +89,10 @@ systemctl  enable  postfix
 `echo "content" | mail -s "title" xxx@foxmail.com`
 
 ### SPF, DKIM, DMARC， RDNS配置
-
+配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
+几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 看[这一篇](https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC)就够了 
-https://www.hostwinds.com/guide/setup-spf-dkim-records-cpanel/
+
 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 
 - SPF (Sender Policy Framework)
@@ -99,3 +100,5 @@ https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - DMARC(Doamin-based Message Authentication, Reporting & Conformance)
 - rDNS(reverse DNS) ip到域名的映射
 
+- DKIM Generator https://tools.socketlabs.com/dkim/generator
+- DMARC Generator https://tools.socketlabs.com/dmarc/generator
