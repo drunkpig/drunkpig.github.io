@@ -89,16 +89,16 @@ systemctl  enable  postfix
 `echo "content" | mail -s "title" xxx@foxmail.com`
 
 ### SPF, DKIM, DMARC， RDNS配置
-配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
-几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
-看[这一篇](https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC)就够了 
-
-https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
-
 - SPF (Sender Policy Framework)
 - DKIM (Domain Keys Identified Mail) 私钥发邮件时签个名，公钥放在dns记录里。
 - DMARC(Doamin-based Message Authentication, Reporting & Conformance)
 - rDNS(reverse DNS) ip到域名的映射
 
+### 参考资料
+- 配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
+- 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
+看[这一篇](https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC)就够了 
+
+- https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - DKIM Generator https://tools.socketlabs.com/dkim/generator
 - DMARC Generator https://tools.socketlabs.com/dmarc/generator
