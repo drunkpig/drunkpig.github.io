@@ -102,3 +102,4 @@ systemctl  enable  postfix
 - https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - DKIM Generator https://tools.socketlabs.com/dkim/generator
 - DMARC Generator https://tools.socketlabs.com/dmarc/generator
+- https://help.ubuntu.com/community/Postfix/DKIM
