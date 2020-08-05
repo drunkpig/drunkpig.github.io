@@ -94,12 +94,17 @@ systemctl  enable  postfix
 - DMARC(Doamin-based Message Authentication, Reporting & Conformance)
 - rDNS(reverse DNS) ip到域名的映射
 
-### 参考资料
-- 配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
-- https://help.ubuntu.com/community/Postfix/DKIM
-- 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 看[这一篇](https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC)就够了 
 
+### 参考资料
+- 配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
+- DKIM 配置官方的：https://help.ubuntu.com/community/Postfix/DKIM
+- 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
+- 看[这一篇](https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC)就够了 
+
+-----------
+以下可做参考
+- 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - DKIM Generator https://tools.socketlabs.com/dkim/generator
 - DMARC Generator https://tools.socketlabs.com/dmarc/generator
@@ -110,3 +115,4 @@ systemctl  enable  postfix
 - 发送email测试打分 https://www.mail-tester.com/   https://dkimvalidator.com/
 - DKMI 测试 https://dkimcore.org/tools/
 - spf, DMARC， dkim 测试 https://tools.socketlabs.com/dkim/generator
+
