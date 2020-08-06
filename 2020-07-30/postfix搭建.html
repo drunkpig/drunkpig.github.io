@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>postfix搭建</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">postfix搭建</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#sendmail">删除sendmail相关服务（如果有）</a></li>
+<li><a href="#postfix">安装postfix</a></li>
+<li><a href="#postfix_1">配置postfix</a></li>
+<li><a href="#stmp">配置stmp账户</a><ul>
+<li><a href="#etcpostfixmaincf">/etc/postfix/main.cf 继续配置</a></li>
+<li><a href="#saslsmtp">编辑通过sasl启用smtp账号密码效验的配置</a></li>
+<li><a href="#smtp">创建smtp 账号</a></li>
+</ul>
+</li>
+<li><a href="#_1">启动</a></li>
+<li><a href="#_2">测试</a></li>
+<li><a href="#spf-dkim-dmarc-rdns">SPF, DKIM, DMARC， RDNS配置</a></li>
+<li><a href="#_3">参考资料</a></li>
+<li><a href="#_4">工具</a></li>
+</ul>
+</div>
+<h3 id="sendmail">删除sendmail相关服务（如果有）</h3>
+<div class="codehilite"><pre><span></span><code>service sendmail stop
+apt remove sendmail
+</code></pre></div>
+
+
+<h3 id="postfix">安装postfix</h3>
+<div class="codehilite"><pre><span></span><code>sudo apt-get install libsasl2-modules postfix sasl2-bin
+</code></pre></div>
+
+
+<h3 id="postfix_1">配置postfix</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># /etc/postfix/main.cf</span>
+<span class="na">myhostname</span> <span class="o">=</span> <span class="s">mail.xxx.com # 系统主机名字,指向邮件服务器的域名地址</span>
+<span class="na">mydomain</span> <span class="o">=</span> <span class="s">xxx.com   # 这个将会成为Email地址 @符号后面的部分</span>
+<span class="na">myorigin</span> <span class="o">=</span> <span class="s">$mydomain  </span>
+<span class="na">mydestination</span> <span class="o">=</span> <span class="s">$myhostname, localhost.$mydomain, localhost, $mydomain  # 可接收邮件的主机和域名</span>
+<span class="na">inet_interfaces</span> <span class="o">=</span> <span class="s">all   # 接收来自所有网络的请求</span>
+<span class="na">inet_protocols</span> <span class="o">=</span> <span class="s">ipv4</span>
+<span class="na">relay_domains</span> <span class="o">=</span> <span class="s">$mydomain # 只有mydomain的邮件才能转发，避免其他人用来发垃圾邮件</span>
+<span class="na">home_mailbox</span> <span class="o">=</span> <span class="s">Maildir/ # 存放用户邮件的目录，每个用户一个文件夹，每个邮件一个单独文件。还有一种Mailbox方式，同一个用户全部邮件内容为单个文件， 默认保存在/var/spool/mail/这个目录下面</span>
+<span class="na">mynetworks</span> <span class="o">=</span> <span class="s">127.0.0.0/8 # 可转发哪些网络的邮件</span>
+<span class="na">smtpd_banner</span> <span class="o">=</span> <span class="s">$myhostname ESMTP </span>
+<span class="c1"># 规定邮件最大尺寸为10M </span>
+<span class="na">message_size_limit</span> <span class="o">=</span> <span class="s">10485760 </span>
+<span class="c1"># 规定收件箱最大容量为1G </span>
+<span class="na">mailbox_size_limit</span> <span class="o">=</span> <span class="s">1073741824 </span>
+</code></pre></div>
+
+
+<h3 id="stmp">配置stmp账户</h3>
+<h4 id="etcpostfixmaincf">/etc/postfix/main.cf 继续配置</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1">#指定可以向postfix发起SMTP连接的客户端的主机名或ip地址,此处permit_sasl_authenticated意思是允许通过了sasl认证的所有用户</span>
+<span class="na">smtpd_client_restrictions</span> <span class="o">=</span> <span class="s">permit_sasl_authenticated</span>
+
+<span class="na">smtpd_recipient_restrictions</span> <span class="o">=</span> <span class="s">permit_mynetworks, permit_sasl_authenticated, </span>
+
+<span class="c1">#指定postfix使用sasl验证 通俗的将就是启用smtp并要求进行账号、密码校验</span>
+<span class="na">smtpd_sasl_auth_enable</span> <span class="o">=</span> <span class="s">yes</span>
+
+<span class="c1">#取消smtp的匿名登录 此项默认值为noanonymous 此项请务必指定为noanonymous</span>
+<span class="na">smtpd_sasl_security_options</span> <span class="o">=</span> <span class="s">noanonymous</span>
+</code></pre></div>
+
+
+<h4 id="saslsmtp">编辑通过sasl启用smtp账号密码效验的配置</h4>
+<p>首先安装<code>saslauthd</code></p>
+<p>然后编辑 <code>/usr/lib/sasl2/smtpd.conf</code></p>
+<div class="codehilite"><pre><span></span><code><span class="na">pwcheck_method: saslauthd</span>
+<span class="c1">#auxprop_plugin: sasldb</span>
+<span class="na">mech_list: PLAIN LOGIN</span>
+</code></pre></div>
+
+
+<h4 id="smtp">创建smtp 账号</h4>
+<p>执行命令 <code>saslpasswd2 -c -u `postconf -h mydomain` test</code> 或者 <code>saslpasswd2 -c -u applesa.cn test</code>
+输入密码即可创建账号 test@applesa.cn 这个账号。</p>
+<p>使用<code>sasldblistusers2</code> 可以查看目前所有的smtp账号。</p>
+<p>添加完账号之后重启一下postfix<code>systemctl restart postfix</code></p>
+<h3 id="_1">启动</h3>
+<div class="codehilite"><pre><span></span><code>systemctl  restart  postfix
+systemctl  <span class="nb">enable</span>  postfix
+</code></pre></div>
+
+
+<h3 id="_2">测试</h3>
+<p><code>echo "content" | mail -s "title" xxx@foxmail.com</code></p>
+<h3 id="spf-dkim-dmarc-rdns">SPF, DKIM, DMARC， RDNS配置</h3>
+<ul>
+<li>SPF (Sender Policy Framework)</li>
+<li>DKIM (Domain Keys Identified Mail) 私钥发邮件时签个名，公钥放在dns记录里。</li>
+<li>DMARC(Doamin-based Message Authentication, Reporting &amp; Conformance)</li>
+<li>rDNS(reverse DNS) ip到域名的映射</li>
+</ul>
+<h3 id="_3">参考资料</h3>
+<ul>
+<li>配置要看具体操作系统的： <a href="https://wiki.debian.org/PostfixAndSASL">https://wiki.debian.org/PostfixAndSASL</a></li>
+<li>DKIM 配置官方的：<a href="https://help.ubuntu.com/community/Postfix/DKIM">https://help.ubuntu.com/community/Postfix/DKIM</a></li>
+<li>几个概念比较详细 <a href="https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc">https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc</a></li>
+<li>深入浅出 SPF，DKIM， DMARC <a href="https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC">https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC</a></li>
+</ul>
+<hr />
+<p>以下可做参考
+- 几个概念比较详细 <a href="https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc">https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc</a>
+- <a href="https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc">https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc</a>
+- DKIM Generator <a href="https://tools.socketlabs.com/dkim/generator">https://tools.socketlabs.com/dkim/generator</a>
+- DMARC Generator <a href="https://tools.socketlabs.com/dmarc/generator">https://tools.socketlabs.com/dmarc/generator</a></p>
+<h3 id="_4">工具</h3>
+<ul>
+<li>在线的界面dig工具 <a href="https://toolbox.googleapps.com/apps/dig/#PTR/">https://toolbox.googleapps.com/apps/dig/#PTR/</a></li>
+<li>发送email测试打分 <a href="https://www.mail-tester.com/">https://www.mail-tester.com/</a>   </li>
+<li>发送email校验 <a href="https://dkimvalidator.com/">https://dkimvalidator.com/</a></li>
+<li>DKMI 测试 <a href="https://dkimcore.org/tools/">https://dkimcore.org/tools/</a></li>
+<li>spf, DMARC， dkim 测试 <a href="https://tools.socketlabs.com/dkim/generator">https://tools.socketlabs.com/dkim/generator</a></li>
+<li><a href="https://tools.wordtothewise.com/authentication">https://tools.wordtothewise.com/authentication</a> 比较好的测试工具</li>
+</ul>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#sendmail">删除sendmail相关服务（如果有）</a></li>
+<li><a href="#postfix">安装postfix</a></li>
+<li><a href="#postfix_1">配置postfix</a></li>
+<li><a href="#stmp">配置stmp账户</a><ul>
+<li><a href="#etcpostfixmaincf">/etc/postfix/main.cf 继续配置</a></li>
+<li><a href="#saslsmtp">编辑通过sasl启用smtp账号密码效验的配置</a></li>
+<li><a href="#smtp">创建smtp 账号</a></li>
+</ul>
+</li>
+<li><a href="#_1">启动</a></li>
+<li><a href="#_2">测试</a></li>
+<li><a href="#spf-dkim-dmarc-rdns">SPF, DKIM, DMARC， RDNS配置</a></li>
+<li><a href="#_3">参考资料</a></li>
+<li><a href="#_4">工具</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/drunkpig/drunkpig.github.io'>2020-08-06 09:06:18</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
