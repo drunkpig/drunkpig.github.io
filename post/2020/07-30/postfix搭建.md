@@ -116,6 +116,7 @@ systemctl  enable  postfix
 - 发送email校验 https://dkimvalidator.com/
 - DKMI 测试 https://dkimcore.org/tools/
 - spf, DMARC， dkim 测试 https://tools.socketlabs.com/dkim/generator
+- spf 测试工具 https://mxtoolbox.com/spf.aspx
 - https://tools.wordtothewise.com/authentication 比较好的测试工具
 
 
