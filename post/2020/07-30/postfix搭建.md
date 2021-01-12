@@ -10,113 +10,283 @@ apt remove sendmail
 
 
 ### 安装postfix
-```bash
-sudo apt-get install libsasl2-modules postfix sasl2-bin
-
-```
+使用ubuntu操作系统，直接参考文档 https://wiki.debian.org/PostfixAndSASL
 
 
-### 配置postfix
 
+###  /etc/postfix/main.cf
 ```ini
-# /etc/postfix/main.cf
-myhostname = mail.xxx.com # 系统主机名字,指向邮件服务器的域名地址
-mydomain = xxx.com   # 这个将会成为Email地址 @符号后面的部分
-myorigin = $mydomain  
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain  # 可接收邮件的主机和域名
-inet_interfaces = all   # 接收来自所有网络的请求
-inet_protocols = ipv4
-relay_domains = $mydomain # 只有mydomain的邮件才能转发，避免其他人用来发垃圾邮件
-home_mailbox = Maildir/ # 存放用户邮件的目录，每个用户一个文件夹，每个邮件一个单独文件。还有一种Mailbox方式，同一个用户全部邮件内容为单个文件， 默认保存在/var/spool/mail/这个目录下面
-mynetworks = 127.0.0.0/8 # 可转发哪些网络的邮件
-smtpd_banner = $myhostname ESMTP 
-# 规定邮件最大尺寸为10M 
-message_size_limit = 10485760 
-# 规定收件箱最大容量为1G 
-mailbox_size_limit = 1073741824 
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+  
 
-```
+# Debian specific:  Specifying a file name will cause the first
+# line of that file to be used as the name.  The Debian default
+# is /etc/mailname.
+#myorigin = /etc/mailname
 
-### 配置stmp账户
+smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+biff = no
 
-#### /etc/postfix/main.cf 继续配置
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
 
-```ini
-#指定可以向postfix发起SMTP连接的客户端的主机名或ip地址,此处permit_sasl_authenticated意思是允许通过了sasl认证的所有用户
-smtpd_client_restrictions = permit_sasl_authenticated
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
 
-smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, 
+readme_directory = no
 
-#指定postfix使用sasl验证 通俗的将就是启用smtp并要求进行账号、密码校验
+# See http://www.postfix.org/COMPATIBILITY_README.html -- default to 2 on
+# fresh installs.
+compatibility_level = 2
+
+# TLS parameters
+smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_use_tls=yes
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+
+smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+myhostname = smtp.mydomain.com
+mydomain = mydomain.com
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+myorigin = /etc/mailname
+mydestination = $myhostname, mydomain.com, host_name, localhost.localdomain, localhost
+relayhost =
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+inet_protocols = all
+
+
+
+
+smtpd_sasl_path = smtpd
+smtp_use_tls = no
+smtpd_sasl_authenticated_header = yes
+smtpd_sasl_local_domain = $myhostname
 smtpd_sasl_auth_enable = yes
+broken_sasl_auth_clients = yes
+smtp_tls_security_level = encrypt
+smtp_sasl_tls_security_options = noanonymous
+smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination
 
-#取消smtp的匿名登录 此项默认值为noanonymous 此项请务必指定为noanonymous
-smtpd_sasl_security_options = noanonymous
+
+
+# DKIM
+milter_default_action = accept
+milter_protocol = 2
+smtpd_milters = inet:localhost:8892
+non_smtpd_milters = inet:localhost:8892
 
 ```
 
-#### 编辑通过sasl启用smtp账号密码效验的配置
+### /etc/default/saslauthd-postfix
+```ini
+#
+# Settings for saslauthd daemon
+# Please read /usr/share/doc/sasl2-bin/README.Debian for details.
+#
 
-首先安装`saslauthd`
+# Should saslauthd run automatically on startup? (default: no)
+START=yes
 
-然后编辑 `/usr/lib/sasl2/smtpd.conf`
+# Description of this saslauthd instance. Recommended.
+# (suggestion: SASL Authentication Daemon)
+DESC="SASL Authentication Daemon for postfox"
+
+# Short name of this saslauthd instance. Strongly recommended.
+# (suggestion: saslauthd)
+NAME="saslauthd-postf"
+
+# Which authentication mechanisms should saslauthd use? (default: pam)
+#
+# Available options in this Debian package:
+# getpwent  -- use the getpwent() library function
+# kerberos5 -- use Kerberos 5
+# pam       -- use PAM
+# rimap     -- use a remote IMAP server
+# shadow    -- use the local shadow password file
+# sasldb    -- use the local sasldb database file
+# ldap      -- use LDAP (configuration is in /etc/saslauthd.conf)
+#
+# Only one option may be used at a time. See the saslauthd man page
+# for more information.
+#
+# Example: MECHANISMS="pam" 这个选项决定了账户是linux账户
+MECHANISMS="shadow"
+
+# Additional options for this mechanism. (default: none)
+# See the saslauthd man page for information about mech-specific options.
+MECH_OPTIONS=""
+
+# How many saslauthd processes should we run? (default: 5)
+# A value of 0 will fork a new process for each connection.
+THREADS=5
+
+# Other options (default: -c -m /var/run/saslauthd)
+# Note: You MUST specify the -m option or saslauthd won't run!
+#
+# WARNING: DO NOT SPECIFY THE -d OPTION.
+# The -d option will cause saslauthd to run in the foreground instead of as
+# a daemon. This will PREVENT YOUR SYSTEM FROM BOOTING PROPERLY. If you wish
+# to run saslauthd in debug mode, please run it by hand to be safe.
+#
+# See /usr/share/doc/sasl2-bin/README.Debian for Debian-specific information.
+# See the saslauthd man page and the output of 'saslauthd -h' for general
+# information about these options.
+#
+# Example for chroot Postfix users: "-c -m /var/spool/postfix/var/run/saslauthd"
+# Example for non-chroot Postfix users: "-c -m /var/run/saslauthd"
+#
+# To know if your Postfix is running chroot, check /etc/postfix/master.cf.
+# If it has the line "smtp inet n - y - - smtpd" or "smtp inet n - - - - smtpd"
+# then your Postfix is running in a chroot.
+# If it has the line "smtp inet n - n - - smtpd" then your Postfix is NOT
+# running in a chroot.
+OPTIONS="-c -m /var/spool/postfix/var/run/saslauthd"
+
+```
+
+### /etc/opendkim.conf 
 
 ```ini
-pwcheck_method: saslauthd
-#auxprop_plugin: sasldb
-mech_list: PLAIN LOGIN
+
+# This is a basic configuration that can easily be adapted to suit a standard
+# installation. For more advanced options, see opendkim.conf(5) and/or
+# /usr/share/doc/opendkim/examples/opendkim.conf.sample.
+
+# Log to syslog
+Syslog                  yes
+# Required to use local socket with MTAs that access the socket as a non-
+# privileged user (e.g. Postfix)
+UMask                   007
+
+# Sign for example.com with key in /etc/dkimkeys/dkim.key using
+# selector '2007' (e.g. 2007._domainkey.example.com)
+Domain                  mydomain.com
+KeyFile         /etc/mail/dkim_mykey.key
+Selector                myselector
+
+# Commonly-used options; the commented-out versions show the defaults.
+#Canonicalization       simple
+#Mode                   sv
+#SubDomains             no
+
+# Socket smtp://localhost
+#
+# ##  Socket socketspec
+# ##
+# ##  Names the socket where this filter should listen for milter connections
+# ##  from the MTA.  Required.  Should be in one of these forms:
+# ##
+# ##  inet:port@address           to listen on a specific interface
+# ##  inet:port                   to listen on all interfaces
+# ##  local:/path/to/socket       to listen on a UNIX domain socket
+#
+Socket                  inet:8892@localhost
+#Socket                 local:/var/run/opendkim/opendkim.sock
+
+##  PidFile filename
+###      default (none)
+###
+###  Name of the file where the filter should write its pid before beginning
+###  normal operations.
+#
+PidFile               /var/run/opendkim/opendkim.pid
+
+
+# Always oversign From (sign using actual From and a null From to prevent
+# malicious signatures header fields (From and/or others) between the signer
+# and the verifier.  From is oversigned by default in the Debian pacakge
+# because it is often the identity key used by reputation systems and thus
+# somewhat security sensitive.
+OversignHeaders         From
+
+##  ResolverConfiguration filename
+##      default (none)
+##
+##  Specifies a configuration file to be passed to the Unbound library that
+##  performs DNS queries applying the DNSSEC protocol.  See the Unbound
+##  documentation at http://unbound.net for the expected content of this file.
+##  The results of using this and the TrustAnchorFile setting at the same
+##  time are undefined.
+##  In Debian, /etc/unbound/unbound.conf is shipped as part of the Suggested
+##  unbound package
+
+# ResolverConfiguration     /etc/unbound/unbound.conf
+
+##  TrustAnchorFile filename
+##      default (none)
+##
+## Specifies a file from which trust anchor data should be read when doing
+## DNS queries and applying the DNSSEC protocol.  See the Unbound documentation
+## at http://unbound.net for the expected format of this file.
+
+TrustAnchorFile       /usr/share/dns/root.key
+
+##  Userid userid
+###      default (none)
+###
+###  Change to user "userid" before starting normal operation?  May include
+###  a group ID as well, separated from the userid by a colon.
+#
+UserID                opendkim
 
 ```
 
-#### 创建smtp 账号
+### /etc/default/opendkim
 
-执行命令 ``saslpasswd2 -c -u `postconf -h mydomain` test`` 或者 `saslpasswd2 -c -u applesa.cn test`
-输入密码即可创建账号 test@applesa.cn 这个账号。
+```ini
+# Command-line options specified here will override the contents of
+# /etc/opendkim.conf. See opendkim(8) for a complete list of options.
+#DAEMON_OPTS=""
+# Change to /var/spool/postfix/var/run/opendkim to use a Unix socket with
+# postfix in a chroot:
+#RUNDIR=/var/spool/postfix/var/run/opendkim
+RUNDIR=/var/run/opendkim
+#
+# Uncomment to specify an alternate socket
+# Note that setting this will override any Socket value in opendkim.conf
+# default:
+#SOCKET=local:$RUNDIR/opendkim.sock
+# listen on all interfaces on port 54321:
+SOCKET=inet:8892@localhost
+# listen on loopback on port 12345:
+#SOCKET=inet:12345@localhost
+# listen on 192.0.2.1 on port 12345:
+#SOCKET=inet:12345@192.0.2.1
+USER=opendkim
+GROUP=opendkim
+PIDFILE=$RUNDIR/$NAME.pid
+EXTRAAFTER=
 
-使用`sasldblistusers2 ` 可以查看目前所有的smtp账号。
-
-添加完账号之后重启一下postfix`systemctl restart postfix`
-
-
-### 启动
-```bash
-
-systemctl  restart  postfix
-systemctl  enable  postfix
 ```
-
-### 测试
-`echo "content" | mail -s "title" xxx@foxmail.com`
 
 ### SPF, DKIM, DMARC， RDNS配置
-- SPF (Sender Policy Framework)
-- DKIM (Domain Keys Identified Mail) 私钥发邮件时签个名，公钥放在dns记录里。
-- DMARC(Doamin-based Message Authentication, Reporting & Conformance)
-- rDNS(reverse DNS) ip到域名的映射
+- DKIM配置  https://help.ubuntu.com/community/Postfix/DKIM  命令生成的内容里有一些多段双引号，删除双引号把内容连起来放入dns配置就可以了
+- SPF配置
+- DMARC配置 https://tools.socketlabs.com/dmarc/generator
+- RDNS配置
+
+### 测试
+- SPF 测试https://mxtoolbox.com/spf.aspx
+- DKMI 校验检测 https://dkimcore.org/tools/
+- SPF、DMARC、DKMI测试 https://tools.wordtothewise.com/authentication
+- 发送email测试打分 https://www.mail-tester.com/ 
+- 发送email测试打分 https://dkimvalidator.com/
+- PTR测试 https://toolbox.googleapps.com/apps/dig/#PTR/
 
 
 ### 参考资料
-- 配置要看具体操作系统的： https://wiki.debian.org/PostfixAndSASL
-- DKIM 配置官方的：https://help.ubuntu.com/community/Postfix/DKIM
 - 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
 - 深入浅出 SPF，DKIM， DMARC https://wiki.zimbra.com/wiki/Best_Practices_on_Email_Protection:_SPF,_DKIM_and_DMARC
 
------------
 
-以下可做参考
-- 几个概念比较详细 https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
-- https://www.smartertools.com/blog/2019/04/09-understanding-spf-dkim-dmarc
-- DKIM Generator https://tools.socketlabs.com/dkim/generator
-- DMARC Generator https://tools.socketlabs.com/dmarc/generator
-
-
-### 工具
-- 在线的界面dig工具 https://toolbox.googleapps.com/apps/dig/#PTR/
-- 发送email测试打分 https://www.mail-tester.com/   
-- 发送email校验 https://dkimvalidator.com/
-- DKMI 测试 https://dkimcore.org/tools/
-- spf, DMARC， dkim 测试 https://tools.socketlabs.com/dkim/generator
-- spf 测试工具 https://mxtoolbox.com/spf.aspx
-- https://tools.wordtothewise.com/authentication 比较好的测试工具
 
 
