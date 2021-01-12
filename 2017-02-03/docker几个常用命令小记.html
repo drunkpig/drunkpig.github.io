@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>docker几个常用命令小记</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">docker几个常用命令小记</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <h2 id="_1">安装</h2>
+<p>安装docker : <a href="https://wiki.deepin.org/index.php?title=Docker">https://wiki.deepin.org/index.php?title=Docker</a></p>
+<p>+root 用户组避免每次都输入sudo: <a href="http://www.cnblogs.com/franson-2016/p/6412971.html">http://www.cnblogs.com/franson-2016/p/6412971.html</a></p>
+<h2 id="pg">PG数据库</h2>
+<div class="codehilite"><pre><span></span><code>sudo docker run -d --restart<span class="o">=</span>always -p5432:5432 -v/home/cxu/_data/pg/data/:/var/lib/postgresql/data/ postgres
+</code></pre></div>
+
+<h2 id="pg-admin">PG-admin</h2>
+<div class="codehilite"><pre><span></span><code>docker run -d --restart<span class="o">=</span>always -p <span class="m">80</span>:80 -e <span class="s2">&quot;PGADMIN_DEFAULT_EMAIL=xuchaoo@gmail.com&quot;</span> -e <span class="s2">&quot;PGADMIN_DEFAULT_PASSWORD=toor&quot;</span> <span class="se">\</span>
+           dpage/pgadmin4
+</code></pre></div>
+
+<h2 id="mongodb">mongodb</h2>
+<div class="codehilite"><pre><span></span><code>docker run -d --restart<span class="o">=</span>always -p27017:27017 -v/home/cxu/_data/_mongo_qikan/:/data/db mongo:3.5
+</code></pre></div>
+
+<h2 id="kafka">kafka 单机</h2>
+<div class="codehilite"><pre><span></span><code>docker run -d  --restart<span class="o">=</span>always   -v/home/cxu/_data/kafka/:/data/kafka/ --name<span class="o">=</span>kafka <span class="se">\</span>
+           --net<span class="o">=</span>host -e <span class="nv">HOSTNAME</span><span class="o">=</span>localhost  xuchaoo/kafka-standalone-docker
+</code></pre></div>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">安装</a></li>
+<li><a href="#pg">PG数据库</a></li>
+<li><a href="#pg-admin">PG-admin</a></li>
+<li><a href="#mongodb">mongodb</a></li>
+<li><a href="#kafka">kafka 单机</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/drunkpig/drunkpig.github.io'>2021-01-13 00:00:07</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
