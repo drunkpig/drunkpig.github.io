@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>开发环境配置</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">开发环境配置</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#windows">windows环境</a><ul>
+<li><a href="#scoop">scoop</a></li>
+<li><a href="#cygwin">cygwin</a></li>
+</ul>
+</li>
+<li><a href="#mac-os">mac os 配置</a><ul>
+<li><a href="#home-brew">home brew</a></li>
+<li><a href="#_1">软件</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 id="windows">windows环境</h2>
+<h3 id="scoop">scoop</h3>
+<p>scoop是一个命令行安装wget、python、java、miniconda等的一个工具。可以切换不同版本。scoop在国内参考下列方式更快</p>
+<ol>
+<li>
+<p><code>powershell
+   Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+   iwr -useb https://gitee.com/RubyKids/scoop-cn/raw/master/install.ps1 | iex</code></p>
+</li>
+<li>
+<p>上述运行完毕就可以执行scoop命令了。为了加快安装速度，推荐切换一下源：</p>
+</li>
+</ol>
+<p><code>she
+   scoop bucket rm main
+   scoop bucket add main https://gitee.com/townsin/Scoop.git
+   scoop bucket add versions # 可以支持多版本切换，例如python
+   scoop bucket add rsync https://github.com/rivy/scoop.bucket.scoop-main.git # 支持rsync等工具</code></p>
+<ol>
+<li>至此安装完毕。如果bucket的地址觉得慢，可以到国内比如gitee上clone一份，用gitee的地址，不过很多人已经clone过来了，gitee会提示相同的clone，用其他人clone好的gitee仓库地址就行了。</li>
+</ol>
+<h3 id="cygwin">cygwin</h3>
+<p>cygwin可以愉快地在win下使用命令行。然后cygwin自带的sshd可以作为服务运行，实现windows远程shell访问。服务环境更统一，避免win自带的那个openssh的很多坑。</p>
+<ol>
+<li>
+<p>到https://<a href="http://www.cygwin.com/">www.cygwin.com/</a> 下载安装包</p>
+</li>
+<li>
+<p>在你的电脑新建一个目录，这个目录我用 CYG_HOME代替。把下好的setup-x86_64.exe放到这个目录里。</p>
+</li>
+<li>
+<p>打开setup-x86_64.exe进行安装，缓存目录选CYG_HOME/_pkgcache/，没有就新建。下载镜像地址选国内的163.com。注意几个组件选上: wget,rsync,sshd</p>
+</li>
+<li>
+<p>一直点下一步，等安装完毕，吧CYG_HOME/bin, CYG_HOME/usr/sbin加入win的环境变量path里，这样在普通win命令行也能用cygwin的命令。</p>
+</li>
+<li>
+<p>这一步安装apt-cyg, 是一个cygwin里在命令行就可以安装组件的神器，要不然每次还要再点开<code>setup-x86_64.exe</code>很麻烦（虽然他也可以命令行，但是命令比较长），对于有洁癖的人也总感觉形式上不统一。apt-cyg就好比ubuntu里的apt-get 命令。精彩讨论请看<a href="https://stackoverflow.com/questions/9260014/how-do-i-install-cygwin-components-from-the-command-line">stackoverflow</a> </p>
+</li>
+</ol>
+<p>```shell
+   # 首先进入cygwin
+   wget <a href="https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg">https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg</a>
+   chmod +x apt-cyg
+   mv apt-cyg /usr/local/bin</p>
+<p>```</p>
+<ol>
+<li>此时安装完毕，接下来开启sshd 服务。</li>
+</ol>
+<p><code>shell
+   ssh-host-config
+   net start cygsshd # 如果不行就到windows服务里看看手工启动</code></p>
+<ol>
+<li>
+<p>开启22端口。参考这篇文章 <a href="https://www.ittsystems.com/create-sftp-server-using-cygwin/#wbounce-modal">https://www.ittsystems.com/create-sftp-server-using-cygwin/#wbounce-modal</a> </p>
+</li>
+<li>
+<p>最后说一下，sftp也能用了。</p>
+</li>
+<li>
+<p>设置cygwin为默认的shell,也就是ssh登录windows后默认为cygwin环境。</p>
+</li>
+</ol>
+<p><code>shell
+   New-ItemProperty -Path "HKLM:\\SOFTWARE\\OpenSSH" -Name DefaultShell -Value "C:\\cygwin64\bin\sh" -PropertyType String -Force</code></p>
+<p>这个我还没试过,纯属YY。</p>
+<h2 id="mac-os">mac os 配置</h2>
+<h3 id="home-brew">home brew</h3>
+<div class="codehilite"><pre><span></span><code>/bin/zsh -c <span class="s2">&quot;</span><span class="k">$(</span>curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+
+<p>参考这篇文章 <a href="https://zhuanlan.zhihu.com/p/111014448">https://zhuanlan.zhihu.com/p/111014448</a></p>
+<h3 id="_1">软件</h3>
+<ul>
+<li>chrome</li>
+<li>wx</li>
+<li>goland</li>
+<li>pycharm</li>
+<li>microsoft rdp</li>
+<li>world、Excel、PPT</li>
+</ul>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#windows">windows环境</a><ul>
+<li><a href="#scoop">scoop</a></li>
+<li><a href="#cygwin">cygwin</a></li>
+</ul>
+</li>
+<li><a href="#mac-os">mac os 配置</a><ul>
+<li><a href="#home-brew">home brew</a></li>
+<li><a href="#_1">软件</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-05-23 21:44:45</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
