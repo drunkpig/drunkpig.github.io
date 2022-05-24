@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>向多个github账户提交代码</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">向多个github账户提交代码</h1>
+            <div class="tags_container">
+                
+                <span>标签：</span>
+                
+                <a class="tag" href="../tags/tag_一个机器提交到多个github账号.html">一个机器提交到多个github账号</a>
+                
+                <a class="tag" href="../tags/tag_git.html">git</a>
+                
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#_1">背景</a></li>
+<li><a href="#_2">配置</a><ul>
+<li><a href="#sshconfig">~/.ssh/config 文件</a></li>
+<li><a href="#ssh">生成ssh密钥</a></li>
+<li><a href="#_3">让密钥生效</a></li>
+<li><a href="#_4">仓库提交地址变化</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 id="_1">背景</h2>
+<p>有的时候为了搞点事情，搞啥不说了，需要从一台机器上向多个github账户提交代码。如何配置账户每个github账户关联一个ssh密钥，从而实现免密提交代码?</p>
+<h2 id="_2">配置</h2>
+<h3 id="sshconfig">~/.ssh/config 文件</h3>
+<div class="codehilite"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">Host bpmw</span>
+    <span class="l l-Scalar l-Scalar-Plain">HostName github.com</span>
+    <span class="l l-Scalar l-Scalar-Plain">User bpmw</span>
+    <span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/.ssh/id_rsa_bpmw</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Host jscrapy</span>
+    <span class="l l-Scalar l-Scalar-Plain">User jscrapy</span>
+    <span class="l l-Scalar l-Scalar-Plain">HostName github.com</span>
+    <span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/.ssh/id_rsa</span>
+
+<span class="l l-Scalar l-Scalar-Plain">Host 123069959</span>
+    <span class="l l-Scalar l-Scalar-Plain">User yaofanzhennan</span>
+    <span class="l l-Scalar l-Scalar-Plain">HostName github.com</span>
+    <span class="l l-Scalar l-Scalar-Plain">IdentityFile ~/.ssh/id_rsa_123069959</span>
+</code></pre></div>
+
+
+<h3 id="ssh">生成ssh密钥</h3>
+<p>秘钥可以用命令 <code>ssh-keygen -t rsa   -C "your@email.com"</code> 生成，注意第一步要你输入秘钥文件名字，（上例config中的 id_rsa_bpmw, id_rsa_123069959）否则会覆盖默认的id_rsa</p>
+<h3 id="_3">让密钥生效</h3>
+<p>执行<code>ssh-add  your_id_rsa_xxx</code> ，全部加进去。如果出现错误执行 <code>ssh-add bash</code></p>
+<p>执行以下两条命令让配置生效</p>
+<div class="codehilite"><pre><span></span><code>ssh-add bash
+ssh-add  your_id_rsa_xxx 
+</code></pre></div>
+
+
+<h3 id="_4">仓库提交地址变化</h3>
+<p>我有个仓库xconfig， clone下来的remote地址是 <code>git@github.com:bpmw/mytest.git</code>。</p>
+<p>需要把这个地址根据config配置文件改为形式为  <code>git@&lt;Host&gt;:&lt;User&gt;/your-repo.git</code>的形式</p>
+<div class="codehilite"><pre><span></span><code>pi@raspberrypi:~/workspace/xconfig $ git remote -v
+origin  git@123069959:yaofanzhennan/xconfig.git <span class="o">(</span>fetch<span class="o">)</span>
+origin  git@123069959:yaofanzhennan/xconfig.git <span class="o">(</span>push<span class="o">)</span>
+</code></pre></div>
+
+
+<p>然后就大功告成了</p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">背景</a></li>
+<li><a href="#_2">配置</a><ul>
+<li><a href="#sshconfig">~/.ssh/config 文件</a></li>
+<li><a href="#ssh">生成ssh密钥</a></li>
+<li><a href="#_3">让密钥生效</a></li>
+<li><a href="#_4">仓库提交地址变化</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-05-24 16:58:17</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
