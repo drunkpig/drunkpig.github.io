@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>动态dns的配置</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">动态dns的配置</h1>
+            <div class="tags_container">
+                
+                <span>标签：</span>
+                
+                <a class="tag" href="../tags/tag_DDNS.html">DDNS</a>
+                
+                <a class="tag" href="../tags/tag_dns.he.net.html">dns.he.net</a>
+                
+                <a class="tag" href="../tags/tag_动态dns配置.html">动态dns配置</a>
+                
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#_1">使用场景</a></li>
+<li><a href="#_2">配置</a><ul>
+<li><a href="#ddns">DDNS服务商选择</a></li>
+<li><a href="#a">添加A记录</a></li>
+<li><a href="#ip">添加动态更新IP脚本</a></li>
+</ul>
+</li>
+<li><a href="#_3">参考脚本</a></li>
+</ul>
+</div>
+<h2 id="_1">使用场景</h2>
+<h2 id="_2">配置</h2>
+<h3 id="ddns">DDNS服务商选择</h3>
+<p>我只能说有很多，我认为dns.he.net比较朴素好用，功能很全。</p>
+<h3 id="a">添加A记录</h3>
+<p><img alt="" src="ddns配置.png" /></p>
+<ul>
+<li>IPv4 Address : 这个他会自动给你填个你的公网出口ip,先不用管</li>
+<li>TTL  ： 由于是动态dns, ip随时会变，所以我都设置为5分钟</li>
+<li>最后打上勾【使能动态ddns】</li>
+</ul>
+<h3 id="ip">添加动态更新IP脚本</h3>
+<p>具体文档可以参考<a href="https://dns.he.net/docs.html">这里</a></p>
+<p>它提供的API很简单，一共2种形式：</p>
+<p>1） 自动识别并更新ip，通过识别你的源ip</p>
+<div class="codehilite"><pre><span></span><code>curl -4 <span class="s2">&quot;https://&lt;your-sub-domain&gt;:&lt;api-key&gt;@dyn.dns.he.net/nic/update?hostname=&lt;your-sub-domain&gt;&quot;</span>
+</code></pre></div>
+
+
+<p>2) 强制指定机器的ip, 如果你想局域网里用域名也成为现实</p>
+<div class="codehilite"><pre><span></span><code>curl  <span class="s2">&quot;https://&lt;your-sub-domain&gt;:&lt;api-key&gt;@dyn.dns.he.net/nic/update?hostname=&lt;your-sub-domain&gt;&amp;myip=192.168.2.3&quot;</span>
+</code></pre></div>
+
+
+<p>api-key哪里来的，看下图：</p>
+<p><img alt="" src="ddns-api-key.png" /></p>
+<h2 id="_3">参考脚本</h2>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nv">ips</span><span class="o">=</span><span class="sb">`</span>/sbin/ifconfig -a <span class="p">|</span> grep inet <span class="p">|</span> grep -v <span class="m">127</span>.0.0.1 <span class="p">|</span> grep -v inet6 <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;addrs&quot;</span><span class="sb">`</span> 
+<span class="nv">ip_array</span><span class="o">=(</span><span class="nv">$ips</span><span class="o">)</span> <span class="c1">#转为数组，ip可能有好几个</span>
+<span class="nv">ip_1</span><span class="o">=</span><span class="si">${</span><span class="nv">ip_array</span><span class="p">[0]</span><span class="si">}</span> <span class="c1">#选第一个ip, 如果要指定的就修改脚本吧</span>
+curl -4 <span class="s2">&quot;https://pc.mkmerich.com:&lt;my-ip-key&gt;@dyn.dns.he.net/nic/update?hostname=pc.mkmerich.com&amp;myip=</span><span class="si">${</span><span class="nv">ip_1</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+
+<p>然后呢，做一个Linux定时任务，我懒省事就用crontab了</p>
+<div class="codehilite"><pre><span></span><code>*/5 *    * * *   linux-user    /path/to/my/shell-script/update-ip.sh
+</code></pre></div>
+
+
+<p>最后我在自己内网中就可以用  <code>ssh my-user@pc.mkmerich.com</code>来登录我的linux了，每次重启也不用担心不知道自己电脑ip是多少。</p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">使用场景</a></li>
+<li><a href="#_2">配置</a><ul>
+<li><a href="#ddns">DDNS服务商选择</a></li>
+<li><a href="#a">添加A记录</a></li>
+<li><a href="#ip">添加动态更新IP脚本</a></li>
+</ul>
+</li>
+<li><a href="#_3">参考脚本</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-05-28 11:48:20</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
