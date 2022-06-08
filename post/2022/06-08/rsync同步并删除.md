@@ -31,7 +31,7 @@ rsync -avuP  --delete src/  dst/     # 这样的效果就是两边完全同步�
 ```shell
 while true
 do  
-  rsync -azuvP --exclude=DwnlData/ --no-owner --no-group ./* root@172.31.0.191:/mnt/xuchaoo_dev/thunder/
+  rsync -azuvP --exclude=DwnlData/ --no-owner --no-group ./* root@111.1.0.110:/mnt/dev/thunder/
   sleep 1m
 done
 ```
