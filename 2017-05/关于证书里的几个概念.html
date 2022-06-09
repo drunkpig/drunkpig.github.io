@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>关于证书里的几个概念</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">关于证书里的几个概念</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#_1">协议与实现</a></li>
+<li><a href="#_2">证书标准</a></li>
+<li><a href="#_3">证书的编码格式</a></li>
+<li><a href="#_4">相关文件扩展名</a></li>
+<li><a href="#_5">几个场景</a></li>
+<li><a href="#_6">参考文章</a></li>
+</ul>
+</div>
+<h2 id="_1">协议与实现</h2>
+<ul>
+<li><strong>SSL/TLS</strong></li>
+<li><strong>OpenSSL</strong> 是 <code>SSL/TLS</code>的一个实现</li>
+</ul>
+<h2 id="_2">证书标准</h2>
+<ul>
+<li><strong>X.509</strong> 是一种证书的标准，里面定义了证书里应该包含哪些内容。参考<em>RFC5280</em>， SSL是按照这个标准实现的。</li>
+</ul>
+<h2 id="_3">证书的编码格式</h2>
+<p><code>X.509</code>证书目前有以下2中证书格式，一种是<code>文本类型</code>，一种是<code>二进制类型</code>。</p>
+<ol>
+<li><strong>PEM</strong> privacy enhanced mail, 是一种文本格式。打开文件看是以 <code>-----BEGIN</code>开头，以<code>-----END</code>结尾，内容用BASE64编码。这类是apache, *NIX系统偏爱的格式。可以使用下面命令查看证书内容
+   <code>openssl x509 -in certificate.pem -text -noout</code>。</li>
+<li><strong>DER</strong> distinguished encoding rules是一种二进制格式。可用下面命令查看证书内容
+   <code>openssl x509 -in certificate.der **-inform der** -text -noout</code>。java和win偏好这种格式。</li>
+</ol>
+<h2 id="_4">相关文件扩展名</h2>
+<ol>
+<li><strong>CRT</strong> 证书（certificate）的一种，常见*NIX系统。可能是PEM或者DER格式。大多是PEM文本编码。</li>
+<li><strong>CER</strong> 也是certificate缩写。常见win系统。大多是DER二进制编码。</li>
+<li><strong>KEY</strong> 非X.509证书。常用来存放一个公钥或者私钥。编码可以是PEM或者DER。查看PEM格式key 
+   <code>openssl rsa -in mykey.key -text -noout</code>
+   查看DER格式key:
+   <code>openssl rsa -in mykey.key -text -noout -inform der</code></li>
+<li><strong>CSR</strong> certificate signing request。证书签名请求。向权威机构请求颁发一个签名证书的申请文件。内部包含了一个公钥和其他信息。随着公钥还有个私钥要自己保存好。查看方法
+   <code>openssl req -noout -text -in my.csr</code>如果是DER则在命令后面加入 -inform der</li>
+<li><strong>JKS</strong></li>
+<li><strong>PFX/P12</strong></li>
+</ol>
+<h2 id="_5">几个场景</h2>
+<ol>
+<li>
+<p><strong>PEM转DER</strong> <code>openssl x509 -in cert.crt -outform der -out cert.der</code></p>
+</li>
+<li>
+<p><strong>DER转PEM</strong> <code>openssl x509 -in cert.crt -inform der -outform pem -out cert.pem</code></p>
+</li>
+</ol>
+<blockquote>
+<p>要转换KEY文件也类似,只不过把x509换成rsa,要转CSR的话,把x509换成req…</p>
+</blockquote>
+<ol>
+<li>
+<p><strong>向权威证书颁发机构申请证书</strong> 生成一个csr:<code>openssl req -newkey rsa:2048 -new -nodes -keyout my.key -out my.csr</code>
+   然后把csr交给权威证书颁发机构，权威证书颁发机构对此进行签名。保留好csr，当权威证书颁发机构颁发的证书过期的时你还可以用同样的csr来申请新的证书，key保持不变</p>
+</li>
+<li>
+<p><strong>生成自签名的证书</strong> <code>openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem</code>
+   在生成证书的过程中会要你填一堆的东西,其实真正要填的只有Common Name,通常填写你服务器的域名,如”yourcompany.com”,或者你服务器的IP地址,其它都可以留空</p>
+</li>
+</ol>
+<h2 id="_6">参考文章</h2>
+<ul>
+<li><a href="http://www.cnblogs.com/guogangj/p/4118605.html">http://www.cnblogs.com/guogangj/p/4118605.html</a></li>
+</ul>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">协议与实现</a></li>
+<li><a href="#_2">证书标准</a></li>
+<li><a href="#_3">证书的编码格式</a></li>
+<li><a href="#_4">相关文件扩展名</a></li>
+<li><a href="#_5">几个场景</a></li>
+<li><a href="#_6">参考文章</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-06-09 09:28:14</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
