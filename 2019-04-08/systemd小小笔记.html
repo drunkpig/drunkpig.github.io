@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>systemd小小笔记</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">systemd小小笔记</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <p><img alt="" src="systemd-logo.gif" /></p>
+<div class="toc">
+<ul>
+<li><a href="#_1">架构</a></li>
+<li><a href="#unit">Unit 抽象</a></li>
+<li><a href="#_2">配置文件</a><ul>
+<li><a href="#unit_1">Unit文件位置</a></li>
+<li><a href="#unit_2">Unit 文件后缀</a></li>
+<li><a href="#unit_3">Unit配置文件状态</a></li>
+<li><a href="#_3">修改、新加配置文件启动</a></li>
+<li><a href="#unit_4">Unit 文件的书写格式</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 id="_1">架构</h2>
+<p><img alt="" src="systemd-arch.png" /></p>
+<h2 id="unit">Unit 抽象</h2>
+<p>systemd管理的所有计算机资源被抽象为Unit，包含12种类：</p>
+<table>
+<thead>
+<tr>
+<th><strong>后缀名</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>.automount</strong></td>
+<td>用于控制自动挂载文件系统。自动挂载即当某一目录被访问时系统自动挂载该目录，这类 unit 取代了传统 Linux 系统的 autofs 相应功能</td>
+</tr>
+<tr>
+<td><strong>.device</strong></td>
+<td>对应 /dev 目录下设备，主要用于定义设备之间的依赖关系</td>
+</tr>
+<tr>
+<td><strong>.mount</strong></td>
+<td>定义系统结构层次中的一个挂载点，可以替代过去的 /etc/fstab 配置文件</td>
+</tr>
+<tr>
+<td><strong>.path</strong></td>
+<td>用于监控指定目录变化，并触发其他 unit 运行</td>
+</tr>
+<tr>
+<td><strong>.scope</strong></td>
+<td>这类 unit 文件不是用户创建的，而是 Systemd 运行时自己产生的，描述一些系统服务的分组信息</td>
+</tr>
+<tr>
+<td><strong>.service</strong></td>
+<td>封装守护进程的启动、停止、重启和重载操作，是最常见的一种 unit 类型</td>
+</tr>
+<tr>
+<td><strong>.slice</strong></td>
+<td>用于描述 cgroup 的一些信息，极少使用到，一般用户就忽略它吧</td>
+</tr>
+<tr>
+<td><strong>.snapshot</strong></td>
+<td>这种 unit 其实是 systemctl snapshot 命令创建的一个描述 Systemd unit 运行状态的快照</td>
+</tr>
+<tr>
+<td><strong>.socket</strong></td>
+<td>监控系统或互联网中的 socket 消息，用于实现基于网络数据自动触发服务启动</td>
+</tr>
+<tr>
+<td><strong>.swap</strong></td>
+<td>定义一个用于做虚拟内存的交换分区</td>
+</tr>
+<tr>
+<td><strong>.target</strong></td>
+<td>用于对 unit 进行逻辑分组，引导其他 unit 的执行。它替代了 SysV 中运行级别的作用，并提供更灵活的基于特定设备事件的启动方式。例如 multi-user.target 相当于过去的运行级别5，而 bluetooth.target 在有蓝牙设备接入时就会被触发</td>
+</tr>
+<tr>
+<td><strong>.timer</strong></td>
+<td>封装由system的里面由时间触发的动作, 替代了 crontab 的功能</td>
+</tr>
+</tbody>
+</table>
+<p>使用<code>systemctl list-units</code>可以看到系统全部的Unit</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># ---------查看系统的Unit----------------------</span>
+
+<span class="c1"># 列出正在运行的 Unit</span>
+$ systemctl list-units
+
+<span class="c1"># 列出所有Unit，包括没有找到配置文件的或者启动失败的</span>
+$ systemctl list-units --all
+
+<span class="c1"># 列出所有没有运行的 Unit</span>
+$ systemctl list-units --all --state<span class="o">=</span>inactive
+
+<span class="c1"># 列出所有加载失败的 Unit</span>
+$ systemctl list-units --failed
+
+<span class="c1"># 列出所有正在运行的、类型为 service 的 Unit</span>
+$ systemctl list-units --type<span class="o">=</span>service
+
+<span class="c1"># --------Unit状态--------------------</span>
+<span class="c1"># 显示某个 Unit 是否正在运行</span>
+$ systemctl is-active application.service
+
+<span class="c1"># 显示某个 Unit 是否处于启动失败状态</span>
+$ systemctl is-failed application.service
+
+<span class="c1"># 显示某个 Unit 服务是否建立了启动链接</span>
+$ systemctl is-enabled application.service
+
+<span class="c1"># ------------Unit 启停 ------------------------</span>
+<span class="c1"># 立即启动一个服务</span>
+$ sudo systemctl start apache.service
+
+<span class="c1"># 立即停止一个服务</span>
+$ sudo systemctl stop apache.service
+
+<span class="c1"># 重启一个服务</span>
+$ sudo systemctl restart apache.service
+
+<span class="c1"># 杀死一个服务的所有子进程</span>
+$ sudo systemctl <span class="nb">kill</span> apache.service
+
+<span class="c1"># 重新加载一个服务的配置文件</span>
+$ sudo systemctl reload apache.service
+
+<span class="c1"># 重载所有修改过的配置文件</span>
+$ sudo systemctl daemon-reload
+
+<span class="c1"># 显示某个 Unit 的所有底层参数</span>
+$ systemctl show httpd.service
+
+<span class="c1"># 显示某个 Unit 的指定属性的值</span>
+$ systemctl show -p CPUShares httpd.service
+
+<span class="c1"># 设置某个 Unit 的指定属性</span>
+$ sudo systemctl set-property httpd.service <span class="nv">CPUShares</span><span class="o">=</span><span class="m">500</span>
+
+<span class="c1"># ----------展示依赖关系------------</span>
+$ systemctl list-dependencies --all nginx.service
+</code></pre></div>
+
+
+<h2 id="_2">配置文件</h2>
+<p>关于配置文件更详细的写法参考：</p>
+<ul>
+<li><a href="https://blog.csdn.net/shuaixingi/article/details/49641721">https://blog.csdn.net/shuaixingi/article/details/49641721</a></li>
+<li><a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html">https://www.freedesktop.org/software/systemd/man/systemd.service.html</a></li>
+<li></li>
+</ul>
+<h3 id="unit_1">Unit文件位置</h3>
+<p>systemd默认读取配置的目录是<code>/etc/systemd/system</code>，里面大部分的文件是软连接，真正的文件放在 <code>/usr/lib/systemd/system/</code></p>
+<p>按照 Systemd 约定，应该被放置在指定的3个系统目录之一。这3个目录是有优先级的，依照下面表格，越靠上的优先级越高，因此在几个目录中有同名文件的时候，只有优先级最高的目录里的那个会被使用。</p>
+<table>
+<thead>
+<tr>
+<th><strong>路径</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>/etc/systemd/system</strong></td>
+<td>系统或用户提供的配置文件</td>
+</tr>
+<tr>
+<td><strong>/run/systemd/system</strong></td>
+<td>软件运行时生成的配置文件</td>
+</tr>
+<tr>
+<td><strong>/usr/lib/systemd/system</strong></td>
+<td>系统或第三方软件安装时添加的配置文件</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 设置开机启动</span>
+$ sudo systemctl <span class="nb">enable</span> xx.service
+
+<span class="c1"># 禁止开机启动 </span>
+$ sudo systemctl disable xx.service
+
+
+<span class="c1"># 列出所有配置文件</span>
+$ systemctl list-unit-files
+
+<span class="c1"># 列出指定类型的配置文件</span>
+$ systemctl list-unit-files --type<span class="o">=</span>service
+</code></pre></div>
+
+
+<h3 id="unit_2">Unit 文件后缀</h3>
+<p>每个文件后缀根据用途可以是Unit抽象一节中的12个类型后缀</p>
+<h3 id="unit_3">Unit配置文件状态</h3>
+<ul>
+<li>enabled：已建立启动链接</li>
+<li>disabled：没建立启动链接</li>
+<li>static：该配置文件没有<code>[Install]</code>部分（无法执行），只能作为其他配置文件的依赖</li>
+<li>masked：该配置文件被禁止建立启动链接</li>
+</ul>
+<p>从配置文件状态你无法看出一个Unit是否在运行，如果要看是否运行可以执行</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">$systemctl</span> status bluetooth.service
+</code></pre></div>
+
+
+<h3 id="_3">修改、新加配置文件启动</h3>
+<div class="codehilite"><pre><span></span><code>$ sudo systemctl daemon-reload
+$ sudo systemctl restart httpd.service
+</code></pre></div>
+
+
+<h3 id="unit_4">Unit 文件的书写格式</h3>
+<p>文件的整体格式类似：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">[Unit]</span>
+<span class="na">Description</span><span class="o">=</span><span class="s">ATD daemon</span>
+
+<span class="k">[Service]</span>
+<span class="na">Type</span><span class="o">=</span><span class="s">forking</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/bin/atd</span>
+
+<span class="k">[Install]</span>
+<span class="na">WantedBy</span><span class="o">=</span><span class="s">multi-user.target</span>
+</code></pre></div>
+
+
+<ol>
+<li>
+<p><code>[Unit]</code>区块通常是配置文件的第一个区块，用来定义 Unit 的元数据，以及配置与其他 Unit 的关系。它的主要字段如下。</p>
+</li>
+<li>
+<p><code>Description</code>：简短描述</p>
+</li>
+<li><code>Documentation</code>：文档地址</li>
+<li><code>Requires</code>：当前 Unit 依赖的其他 Unit，如果它们没有运行，当前 Unit 会启动失败</li>
+<li><code>Wants</code>：与当前 Unit 配合的其他 Unit，如果它们没有运行，当前 Unit 不会启动失败</li>
+<li><code>BindsTo</code>：与<code>Requires</code>类似，它指定的 Unit 如果退出，会导致当前 Unit 停止运行</li>
+<li><code>Before</code>：如果该字段指定的 Unit 也要启动，那么必须在当前 Unit 之后启动</li>
+<li><code>After</code>：如果该字段指定的 Unit 也要启动，那么必须在当前 Unit 之前启动</li>
+<li><code>Conflicts</code>：这里指定的 Unit 不能与当前 Unit 同时运行</li>
+<li><code>Condition...</code>：当前 Unit 运行必须满足的条件，否则不会运行</li>
+<li>
+<p><code>Assert...</code>：当前 Unit 运行必须满足的条件，否则会报启动失败</p>
+</li>
+<li>
+<p><code>[Service]</code>区块用来 Service 的配置，只有 Service 类型的 Unit 才有这个区块。它的主要字段如下。</p>
+</li>
+<li>
+<p><code>Type</code>：定义启动时的进程行为。它有以下几种值。</p>
+</li>
+<li><code>Type=simple</code>：默认值，执行<code>ExecStart</code>指定的命令，启动主进程</li>
+<li><code>Type=forking</code>：以 fork 方式从父进程创建子进程，创建后父进程会立即退出</li>
+<li><code>Type=oneshot</code>：一次性进程，Systemd 会等当前服务退出，再继续往下执行</li>
+<li><code>Type=dbus</code>：当前服务通过D-Bus启动</li>
+<li><code>Type=notify</code>：当前服务启动完毕，会通知<code>Systemd</code>，再继续往下执行</li>
+<li><code>Type=idle</code>：若有其他任务执行完毕，当前服务才会运行</li>
+<li><code>ExecStart</code>：启动当前服务的命令</li>
+<li><code>ExecStartPre</code>：启动当前服务之前执行的命令</li>
+<li><code>ExecStartPost</code>：启动当前服务之后执行的命令</li>
+<li><code>ExecReload</code>：重启当前服务时执行的命令</li>
+<li><code>ExecStop</code>：停止当前服务时执行的命令</li>
+<li><code>ExecStopPost</code>：停止当其服务之后执行的命令</li>
+<li><code>RestartSec</code>：自动重启当前服务间隔的秒数</li>
+<li><code>Restart</code>：定义何种情况 Systemd 会自动重启当前服务，可能的值包括<code>always</code>（总是重启）、<code>on-success</code>、<code>on-failure</code>、<code>on-abnormal</code>、<code>on-abort</code>、<code>on-watchdog</code></li>
+<li><code>TimeoutSec</code>：定义 Systemd 停止当前服务之前等待的秒数</li>
+<li>
+<p><code>Environment</code>：指定环境变量</p>
+</li>
+<li>
+<p><code>[Install]</code>通常是配置文件的最后一个区块，用来定义如何启动，以及是否开机启动。它的主要字段如下。</p>
+</li>
+<li>
+<p><code>Description</code>：简短描述</p>
+</li>
+<li><code>Documentation</code>：文档地址</li>
+<li><code>Requires</code>：当前 Unit 依赖的其他 Unit，如果它们没有运行，当前 Unit 会启动失败</li>
+<li><code>Wants</code>：与当前 Unit 配合的其他 Unit，如果它们没有运行，当前 Unit 不会启动失败</li>
+<li><code>BindsTo</code>：与<code>Requires</code>类似，它指定的 Unit 如果退出，会导致当前 Unit 停止运行</li>
+<li><code>Before</code>：如果该字段指定的 Unit 也要启动，那么必须在当前 Unit 之后启动</li>
+<li><code>After</code>：如果该字段指定的 Unit 也要启动，那么必须在当前 Unit 之前启动</li>
+<li><code>Conflicts</code>：这里指定的 Unit 不能与当前 Unit 同时运行</li>
+<li><code>Condition...</code>：当前 Unit 运行必须满足的条件，否则不会运行</li>
+<li><code>Assert...</code>：当前 Unit 运行必须满足的条件，否则会报启动失败</li>
+</ol>
+<p>更具体的参数详解： <a href="https://blog.csdn.net/shuaixingi/article/details/49641721">https://blog.csdn.net/shuaixingi/article/details/49641721</a></p>
+<p>## Target</p>
+<p>Target 就是一个 Unit 组，包含许多相关的 Unit 。启动某个 Target 的时候，Systemd 就会启动里面所有的 Unit。</p>
+<p>## 日志管理</p>
+<p>Systemd 统一管理所有 Unit 的启动日志。带来的好处就是，可以只用<code>journalctl</code>一个命令，查看所有日志（内核日志和应用日志）。日志的配置文件是<code>/etc/systemd/journald.conf</code>。</p>
+<p>```bash
+   # 查看所有日志（默认情况下 ，只保存本次启动的日志）
+   $ sudo journalctl</p>
+<p># 查看内核日志（不显示应用日志）
+   $ sudo journalctl -k</p>
+<p># 查看系统本次启动的日志
+   <mathjax>$ sudo journalctl -b
+   $</mathjax> sudo journalctl -b -0</p>
+<p># 查看上一次启动的日志（需更改设置）
+   $ sudo journalctl -b -1</p>
+<p># 查看指定时间的日志
+   <mathjax>$ sudo journalctl --since="2012-10-30 18:17:16"
+   $</mathjax> sudo journalctl --since "20 min ago"
+   <mathjax>$ sudo journalctl --since yesterday
+   $</mathjax> sudo journalctl --since "2015-01-10" --until "2015-01-11 03:00"
+   $ sudo journalctl --since 09:00 --until "1 hour ago"</p>
+<p># 显示尾部的最新10行日志
+   $ sudo journalctl -n</p>
+<p># 显示尾部指定行数的日志
+   $ sudo journalctl -n 20</p>
+<p># 实时滚动显示最新日志
+   $ sudo journalctl -f</p>
+<p># 查看指定服务的日志
+   $ sudo journalctl /usr/lib/systemd/systemd</p>
+<p># 查看指定进程的日志
+   $ sudo journalctl _PID=1</p>
+<p># 查看某个路径的脚本的日志
+   $ sudo journalctl /usr/bin/bash</p>
+<p># 查看指定用户的日志
+   $ sudo journalctl _UID=33 --since today</p>
+<p># 查看某个 Unit 的日志
+   <mathjax>$ sudo journalctl -u nginx.service
+   $</mathjax> sudo journalctl -u nginx.service --since today</p>
+<p># 实时滚动显示某个 Unit 的最新日志
+   $ sudo journalctl -u nginx.service -f</p>
+<p># 合并显示多个 Unit 的日志
+   $ journalctl -u nginx.service -u php-fpm.service --since today</p>
+<p># 查看指定优先级（及其以上级别）的日志，共有8级
+   # 0: emerg
+   # 1: alert
+   # 2: crit
+   # 3: err
+   # 4: warning
+   # 5: notice
+   # 6: info
+   # 7: debug
+   $ sudo journalctl -p err -b</p>
+<p># 日志默认分页输出，--no-pager 改为正常的标准输出
+   $ sudo journalctl --no-pager</p>
+<p># 以 JSON 格式（单行）输出
+   $ sudo journalctl -b -u nginx.service -o json</p>
+<p># 以 JSON 格式（多行）输出，可读性更好
+   $ sudo journalctl -b -u nginx.serviceqq
+    -o json-pretty</p>
+<p># 显示日志占据的硬盘空间
+   $ sudo journalctl --disk-usage</p>
+<p># 指定日志文件占据的最大空间
+   $ sudo journalctl --vacuum-size=1G</p>
+<p># 指定日志文件保存多久
+   $ sudo journalctl --vacuum-time=1years
+   ```</p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">架构</a></li>
+<li><a href="#unit">Unit 抽象</a></li>
+<li><a href="#_2">配置文件</a><ul>
+<li><a href="#unit_1">Unit文件位置</a></li>
+<li><a href="#unit_2">Unit 文件后缀</a></li>
+<li><a href="#unit_3">Unit配置文件状态</a></li>
+<li><a href="#_3">修改、新加配置文件启动</a></li>
+<li><a href="#unit_4">Unit 文件的书写格式</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-06-22 21:01:59</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
