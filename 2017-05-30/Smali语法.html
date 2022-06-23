@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Smali语法</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">Smali语法</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <h2 id="_1">数据类型</h2>
+<p>V： void</p>
+<p>I：Int 32 bit</p>
+<p>J: Long 64bit</p>
+<p>Z: Boolean</p>
+<p>B: Byte</p>
+<p>S: short</p>
+<p>F: float</p>
+<p>D: double 64 bit</p>
+<p>C : chart</p>
+<p>[X: Array表示法。 例如 [I 表示 int[], [Ljava/lang/String; 代表 String[]</p>
+<p>[[[I表示 int[][][][][][][]</p>
+<p>实例对象的调用： Lpkg/path/objTypeA;-&gt;MethodName(IIJ); Ljava/pkg/ObjTypeB; 翻译为java代码</p>
+<div class="codehilite"><pre><span></span><code><span class="err">// class ObjTypeApkg.path.objTypeB  methodName(int i, int j, int m)</span>
+</code></pre></div>
+
+
+<h2 id="_2">寄存器的表示方法</h2>
+<h3 id="p">P命名表示法</h3>
+<h3 id="v">V命名表示法</h3>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">数据类型</a></li>
+<li><a href="#_2">寄存器的表示方法</a><ul>
+<li><a href="#p">P命名表示法</a></li>
+<li><a href="#v">V命名表示法</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-06-23 09:17:50</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
