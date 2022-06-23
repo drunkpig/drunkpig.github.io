@@ -30,12 +30,12 @@ ssh  root@192.168.1.2 "cd /root/youtube/videos;find  . -type f -print0" | xargs 
 
 
 
-### parelle方式
+### parellel方式
 
 暂未使用。
 
 ```bash
-ssh  root@192.168.1.2 "cd /root/youtube/videos;find  . -type f -print0" | xargs -0 -j 10 rsync -avuP  root@192.168.1.2:/root/youtube/videos/{}   /my/local/dir/
+ssh  root@192.168.1.2 "cd /root/youtube/videos;find  . -type f -print0" | parallel -0 -j 10 rsync -avuP  root@192.168.1.2:/root/youtube/videos/{}   /my/local/dir/
 ```
 
 
