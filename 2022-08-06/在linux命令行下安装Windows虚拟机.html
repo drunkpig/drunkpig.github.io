@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>在linux命令行下安装Windows虚拟机</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">在linux命令行下安装Windows虚拟机</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#_1">几个疑问</a></li>
+<li><a href="#_2">环境和软件准备</a></li>
+<li><a href="#_3">安装软件</a></li>
+<li><a href="#_4">创建虚拟机</a></li>
+<li><a href="#_5">启动</a></li>
+<li><a href="#_6">其他控制命令</a></li>
+<li><a href="#_7">异常</a></li>
+<li><a href="#_8">参考文章</a></li>
+</ul>
+</div>
+<h2 id="_1">几个疑问</h2>
+<ol>
+<li>Windows10安装好了之后需要界面进去设置RDP远程访问。但是一般linux服务器完全的命令行方式岂不是陷入了鸡生蛋、蛋生鸡的困境？<blockquote>
+<p>virtualbox 提供了一个叫vrde的方式，当你启动一个虚拟机（无论是否已经安装好os）的时候，你就可以使用rdp的任何客户端连接这个服务，然后就看到了界面，通过这个界面安装操作系统和在本地用USB的方式安装操作系统一样，点击下一步就可以了。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="_2">环境和软件准备</h2>
+<ol>
+<li>linux服务器一台，配置看个人，我的是完全的命令方式</li>
+<li>下载好windows10.iso</li>
+<li>下载 virtualbox <a href="https://download.virtualbox.org/virtualbox/6.1.36/VirtualBox-6.1-6.1.36_152435_el6-1.x86_64.rpm">https://download.virtualbox.org/virtualbox/6.1.36/VirtualBox-6.1-6.1.36_152435_el6-1.x86_64.rpm</a></li>
+<li>下载 virtualbox扩展包，有了这个才能再命令行模式下安装操作系统  <a href="https://download.virtualbox.org/virtualbox/6.1.36/Oracle_VM_VirtualBox_Extension_Pack-6.1.36-152435.vbox-extpack">https://download.virtualbox.org/virtualbox/6.1.36/Oracle_VM_VirtualBox_Extension_Pack-6.1.36-152435.vbox-extpack</a></li>
+<li>下载 virtualbox guest additions <a href="https://download.virtualbox.org/virtualbox/6.1.36/VBoxGuestAdditions_6.1.36.iso">https://download.virtualbox.org/virtualbox/6.1.36/VBoxGuestAdditions_6.1.36.iso</a></li>
+</ol>
+<blockquote>
+<p>关于virtualbox的不同版本，不同平台的安装都在这个连接 <a href="https://download.virtualbox.org/virtualbox/，">https://download.virtualbox.org/virtualbox/，</a> 根据情况自己去看。</p>
+</blockquote>
+<div class="codehilite"><pre><span></span><code>$ ls -l
+-rw-r--r-- <span class="m">1</span> xxxxxx root   <span class="m">11231896</span> Jul <span class="m">20</span> <span class="m">22</span>:08 Oracle_VM_VirtualBox_Extension_Pack-6.1.36a-152435.vbox-extpack
+-rw-r--r-- <span class="m">1</span> xxxxxx root   <span class="m">63803392</span> Jul <span class="m">20</span> <span class="m">09</span>:54 VBoxGuestAdditions_6.1.36.iso
+-rw-r--r-- <span class="m">1</span> xxxxxx root   <span class="m">97752792</span> Jul <span class="m">20</span> <span class="m">10</span>:42 VirtualBox-6.1-6.1.36_152435_el7-1.x86_64.rpm
+drwx------ <span class="m">3</span> xxxxxx root         <span class="m">48</span> Aug  <span class="m">4</span> <span class="m">10</span>:49 win10
+-rw-r--r-- <span class="m">1</span> xxxxxx root <span class="m">4682743808</span> Aug  <span class="m">4</span> <span class="m">15</span>:09 Windows.iso
+</code></pre></div>
+
+
+<h2 id="_3">安装软件</h2>
+<div class="codehilite"><pre><span></span><code><span class="nv">$sudo</span> yum install ./VirtualBox-6.1-6.1.36_152435_el7-1.x86_64.rpm  <span class="c1"># 安装virtual box虚拟机</span>
+<span class="nv">$sudo</span> vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-6.1.36a-152435.vbox-extpack  <span class="c1"># 安装virtual box 命令扩展包</span>
+<span class="nv">$vboxmanage</span> list extpacks <span class="c1"># 检查一下扩展包是否成功，如果出现下面这个输出就是成功</span>
+Extension Packs: <span class="m">1</span>
+Pack no. <span class="m">0</span>:   Oracle VM VirtualBox Extension Pack
+Version:      <span class="m">6</span>.1.36
+Revision:     <span class="m">152435</span>
+Edition:      
+Description:  Oracle Cloud Infrastructure integration, USB <span class="m">2</span>.0 and USB <span class="m">3</span>.0 Host Controller, Host Webcam, VirtualBox RDP, PXE ROM, Disk Encryption, NVMe.
+VRDE Module:  VBoxVRDP
+Usable:       <span class="nb">true</span> 
+Why unusable: 
+</code></pre></div>
+
+
+<h2 id="_4">创建虚拟机</h2>
+<div class="codehilite"><pre><span></span><code><span class="nv">$VBoxManage</span> createvm --name win10 --ostype Windows7_64 --basefolder ~/myvm/ --register <span class="c1"># 创建虚拟机，名字为win10,保存再 ~/myvm/下</span>
+<span class="nv">$VBoxManage</span> createmedium --filename ~/myvm/win10.vdi --size <span class="m">102400</span> <span class="c1">#创建一个磁盘， 大小10GB</span>
+<span class="nv">$VBoxManage</span> storagectl win10 --name SATAController --add sata --controller IntelAHCI <span class="c1"># 磁盘控制器</span>
+<span class="nv">$VBoxManage</span> storageattach win10 --storagectl SATAController --port <span class="m">0</span> --device <span class="m">0</span> --type hdd --medium ~/myvm/win10.vdi <span class="c1"># 控制器和磁盘绑定</span>
+<span class="nv">$VBoxManage</span> storagectl win10 --name dvddrive --add ide <span class="c1"># 加一个光驱</span>
+<span class="nv">$VBoxManage</span> storageattach win10 --storagectl dvddrive --type dvddrive --port <span class="m">1</span> --device <span class="m">0</span> --medium ~/win7.iso <span class="c1">#插入操作系统光盘镜像</span>
+<span class="nv">$VBosManage</span> modifyvm win10 --memory <span class="m">20480</span>  <span class="c1"># 配置虚拟机内存20GB</span>
+<span class="nv">$VBosManage</span> modifyvm win10 --cpus <span class="m">8</span>  <span class="c1"># 配置虚拟机CPU个数</span>
+
+<span class="c1"># 启动顺序设置</span>
+<span class="nv">$VBoxManage</span> modifyvm win10 --boot1 dvd 
+<span class="nv">$VBoxManage</span> modifyvm win10 --boot1 disk
+
+<span class="nv">$VBoxManage</span> modifyvm win10 --nic1 bridged --cableconnected1 on --bridgeadapter1 enp7s0 <span class="c1"># 桥接模式上网，也就是虚拟机会从局域网得到一个IP，使用网卡为enp7s0, 网卡名字根据自己linux情况具体而定</span>
+<span class="nv">$VBoxManage</span> modifyvm win10 --vrde on
+<span class="nv">$VBoxManage</span> modifyvm win10 --vrdeport <span class="m">3900</span> <span class="c1"># 这个端口是你用RDP连接Windows的端口</span>
+</code></pre></div>
+
+
+<h2 id="_5">启动</h2>
+<div class="codehilite"><pre><span></span><code><span class="nv">$VBoxManage</span> startvm win10 --type headless --vrdp on
+</code></pre></div>
+
+
+<ol>
+<li>如果你的linux服务器有公网ip，那么啥都不用做。如果是通过的跳板机，那么还要做个ssh隧道，这个我就不详细说了，经常用的人都懂。把3900映射到本地来。</li>
+<li>此时可以通过rdp(就是Windows自带的那个远程桌面)远程访问了，输入<code>localhost:3900</code>（我是用的ssh隧道，如果你的linux有公网ip就用公网ip）第一次访问是安装操作系统，一直点击下一步就行了（这个时候鼠标重影还很严重）。</li>
+<li>安装好操作系统第二次进入稍作配置（此时依旧鼠标重影），然后关机</li>
+<li><code>$VBoxManage storageattach win10 --storagectl dvddrive --type dvddrive --port 1 --device 0 --medium ~/VBoxGuestAdditions_6.1.36.iso</code> 通过命令挂载VBoxGuestAdditions, 然后开机，点开我的电脑-&gt;光驱进行安装，之后重新启动，发现鼠标没有重影了。</li>
+<li>此时通过远程桌面连接，虚拟机的屏幕很小，怎么解决？ TODO</li>
+</ol>
+<h2 id="_6">其他控制命令</h2>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 关闭虚拟机</span>
+<span class="nv">$VBoxManage</span> controlvm win10 poweroff
+<span class="nv">$VBoxManage</span> controlvm win10 acpipowerbutton
+<span class="nv">$VBoxManage</span> list vms <span class="c1"># 查看目前已经安装的虚拟机</span>
+</code></pre></div>
+
+
+<h2 id="_7">异常</h2>
+<blockquote>
+<p>VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005) with meanjs and vagrant \
+这是因为在命令行下启动虚拟机，必须加上<code>headless</code> , 例如 <code>VBoxManage startvm "VM name" --type headless</code></p>
+<p>VM in virtualbox is already locked for a session (or being unlocked) \
+执行 <code>vboxmanage startvm &lt;vm-uuid&gt; --type emergencystop</code></p>
+</blockquote>
+<h2 id="_8">参考文章</h2>
+<ul>
+<li><a href="https://post.smzdm.com/p/a27n9lzn/?ivk_sa=1024320u">https://post.smzdm.com/p/a27n9lzn/?ivk_sa=1024320u</a></li>
+<li><a href="https://www.linuxprobe.com/virtualbox-cmd-manage.html">https://www.linuxprobe.com/virtualbox-cmd-manage.html</a></li>
+</ul>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#_1">几个疑问</a></li>
+<li><a href="#_2">环境和软件准备</a></li>
+<li><a href="#_3">安装软件</a></li>
+<li><a href="#_4">创建虚拟机</a></li>
+<li><a href="#_5">启动</a></li>
+<li><a href="#_6">其他控制命令</a></li>
+<li><a href="#_7">异常</a></li>
+<li><a href="#_8">参考文章</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-09-18 20:23:39</a>
+	
+	</div>
+</div>
+
+</body>
+</html>

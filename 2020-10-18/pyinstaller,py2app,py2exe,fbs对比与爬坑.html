@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>pyinstaller,py2app,py2exe,fbs对比与爬坑</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">pyinstaller,py2app,py2exe,fbs对比与爬坑</h1>
+            <div class="tags_container">
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#pyinstaller-py2app-py2exe-fbs">pyinstaller, py2app, py2exe, fbs功能对比</a></li>
+<li><a href="#py2exe">py2exe</a></li>
+<li><a href="#pyinstallerpyqt5">pyinstaller打包pyqt5程序</a><ul>
+<li><a href="#_1">打包过程</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ul>
+</li>
+<li><a href="#py2app">py2app</a></li>
+</ul>
+</div>
+<h2 id="pyinstaller-py2app-py2exe-fbs">pyinstaller, py2app, py2exe, fbs功能对比</h2>
+<p><img alt="功能对比图" src="打包工具功能.png" /></p>
+<h2 id="py2exe">py2exe</h2>
+<p>软件更新已经不活跃，因此也就略过。</p>
+<h2 id="pyinstallerpyqt5">pyinstaller打包pyqt5程序</h2>
+<p>明确支持win8、win10、理论上支持win7,，支持apple Macos, linux。
+pyinsaller可以打包成文件夹形式内含exe入口执行文件的形式，也可以是一个单独的exe文件。</p>
+<blockquote>
+<p>截止目前pyinstaller支持的py最高版本为3.7,在3.8上不稳定。</p>
+</blockquote>
+<h3 id="_1">打包过程</h3>
+<ol>
+<li>打包最好使用virtualenv,不要用全局python解释器，这样会打进来很多无关的依赖。</li>
+<li>然后在venv里安使用pip装pyinstaller, 很简单 。执行<code>pip install pyinstaller</code></li>
+<li>执行打包命令：<code>pyinstaller  -w  your-main.py</code>。<code>-w</code>的意思是一个带有GUI的程序，不要出现console那个黑乎乎的命令界面。</li>
+</ol>
+<h3 id="faq">FAQ</h3>
+<ol>
+<li>failed to execute script ” When App Clicked。<img alt="" src="failedtoexescript.png" />。<br>
+出现这个问题情况多样，最大可能是比如你的logging.ini,或者依赖的一些数据、配置、图片等资源在打包的时候没有打进去，因为这些非py的资源是需要人为指定的，pyinstaller不会自动copy。<br>
+要找到错误在运行打包命令的时候加入 <code>--debug imports</code> 然后去掉<code>-w</code>参数,这样重新打包，可以看到命令窗口的输入，里面东西很多，往上翻一番总能看到错误，然后根据缺少的文件在spec文件里的<code>datas</code>字段里进行人工指定。<code>spec</code>是什么下面简单记录下。</li>
+<li>spec文件。<br>主要记录下里面的datas这个字段，其他的暂时没用上。当你执行了打包命令<code>pyinstaller -w --debug import mymain.py</code>的时候，会自动在当前目录生成一个默认的mymain.spec，里面控制了打包的详细细节。<br>pyinstaller不会自动copy程序依赖的配置文件，数据文件，第三方的exe工具等，这是经常导致打包出来的程序无法运行的主要原因。这些文件在spec文件的datas里进行配置：<br></li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="n">a</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">([</span><span class="s1">&#39;main.py&#39;</span><span class="p">],</span>
+             <span class="n">pathex</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;D:</span><span class="se">\\</span><span class="s1">workspace</span><span class="se">\\</span><span class="s1">myproj&#39;</span><span class="p">],</span>
+             <span class="n">binaries</span><span class="o">=</span><span class="p">[],</span>
+             <span class="n">datas</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;logging.ini&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">),(</span><span class="s1">&#39;config.ini&#39;</span><span class="p">,</span><span class="s1">&#39;config/&#39;</span><span class="p">)],</span>
+             <span class="n">hiddenimports</span><span class="o">=</span><span class="p">[],</span>
+             <span class="n">hookspath</span><span class="o">=</span><span class="p">[],</span>
+             <span class="n">runtime_hooks</span><span class="o">=</span><span class="p">[],</span>
+             <span class="n">excludes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;logs/*.*&#39;</span><span class="p">],</span>
+             <span class="n">win_no_prefer_redirects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">win_private_assemblies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">cipher</span><span class="o">=</span><span class="n">block_cipher</span><span class="p">,</span>
+             <span class="n">noarchive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>datas字段是个tuple数组。每个tuple元素第一个是要copy的数据文件位置（相对于工程根目录), 第二个参数是要copy的打包程序的目的地址，例子中的点代表就在被打成的包的最顶层。如果要放入其他目录比如images参考例子中第二项,这样打成的包里就会有个目录config,下面有config.ini。</p>
+<h2 id="py2app">py2app</h2>
+<p>py2app主要是完成macos下的python程序打包。</p>
+<p>### 主要步骤</p>
+<ol>
+<li>工程根目录生成setup.py。 执行命令<code>py2applet --make-setup gui.py</code>。py2applet是安装了py2app后自带的。</li>
+<li>和pyinstaller一样，数据文件需要自己手工来指定。<br>
+ <code>python
+ DATA_FILES = ['logging.ini',('appres', ['resource/xx.exe'])]</code>
+py2app的资源指定写法和pyinstaller有点不一样。他也是一个数组，只不过可以是一个单一文件，也可以是个tuple。单一文件就直接copy到打包的根目录下。如果是个tuple，tuple的第二个元素是一个数组，上例子代表把工程里<code>resource/xx.exe</code>copy到打包目标根目录下的appres下面——也就是把xx.exe放到了打成的包的appres/xx.exe。这一点比较坑人。</li>
+</ol>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#pyinstaller-py2app-py2exe-fbs">pyinstaller, py2app, py2exe, fbs功能对比</a></li>
+<li><a href="#py2exe">py2exe</a></li>
+<li><a href="#pyinstallerpyqt5">pyinstaller打包pyqt5程序</a><ul>
+<li><a href="#_1">打包过程</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ul>
+</li>
+<li><a href="#py2app">py2app</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-09-18 20:23:39</a>
+	
+	</div>
+</div>
+
+</body>
+</html>

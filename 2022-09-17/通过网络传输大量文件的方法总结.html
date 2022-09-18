@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>通过网络传输大量文件的方法总结</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">通过网络传输大量文件的方法总结</h1>
+            <div class="tags_container">
+                
+                <span>标签：</span>
+                
+                <a class="tag" href="../tags/tag_linux.html">linux</a>
+                
+                <a class="tag" href="../tags/tag_rsync.html">rsync</a>
+                
+                <a class="tag" href="../tags/tag_zsync.html">zsync</a>
+                
+                <a class="tag" href="../tags/tag_lftp.html">lftp</a>
+                
+                <a class="tag" href="../tags/tag_ttcp.html">ttcp</a>
+                
+                <a class="tag" href="../tags/tag_ncftpd.html">ncftpd</a>
+                
+                <a class="tag" href="../tags/tag_rsync over http.html">rsync over http</a>
+                
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#tar">tar的方式</a><ul>
+<li><a href="#_1">同设备</a></li>
+<li><a href="#_2">垮网络</a></li>
+</ul>
+</li>
+<li><a href="#_3">其他工具</a><ul>
+<li><a href="#rsync">rsync</a></li>
+<li><a href="#zsync">zsync</a></li>
+<li><a href="#unison">unison</a></li>
+<li><a href="#ncftpd">ncFTPd 非开源的</a></li>
+<li><a href="#ttcp">ttcp 网络反射</a></li>
+<li><a href="#lftp">lftp</a></li>
+</ul>
+</li>
+<li><a href="#linux">其他linux命令</a></li>
+<li><a href="#_4">参考</a></li>
+</ul>
+</div>
+<h2 id="tar">tar的方式</h2>
+<h3 id="_1">同设备</h3>
+<div class="codehilite"><pre><span></span><code>$ tar cf - . <span class="p">|</span> <span class="o">(</span><span class="nb">cd</span> /dst<span class="p">;</span> tar xvf -<span class="o">)</span>
+</code></pre></div>
+
+
+<h3 id="_2">垮网络</h3>
+<div class="codehilite"><pre><span></span><code>$ tar czf - &lt;files&gt; <span class="p">|</span> ssh user@host <span class="s2">&quot;cd /wherever &amp;&amp; tar xvzf -&quot;</span>
+</code></pre></div>
+
+
+<h2 id="_3">其他工具</h2>
+<h3 id="rsync">rsync</h3>
+<h3 id="zsync">zsync</h3>
+<p><a href="http://zsync.moria.org.uk/">http://zsync.moria.org.uk/</a></p>
+<h3 id="unison">unison</h3>
+<p><a href="https://github.com/bcpierce00/unison">https://github.com/bcpierce00/unison</a></p>
+<h3 id="ncftpd">ncFTPd 非开源的</h3>
+<p><a href="https://www.ncftp.com/ncftpd/features.html#performance">https://www.ncftp.com/ncftpd/features.html#performance</a></p>
+<h3 id="ttcp">ttcp 网络反射</h3>
+<p><a href="https://ftp.arl.mil/mike/ttcp.html">https://ftp.arl.mil/mike/ttcp.html</a></p>
+<h3 id="lftp">lftp</h3>
+<p>支持bittorrent, http, 等，但是没测试过 <a href="https://lftp.yar.ru/lftp-man.html">https://lftp.yar.ru/lftp-man.html</a> </p>
+<h2 id="linux">其他linux命令</h2>
+<ol>
+<li><code>gcp</code>  Besides of progress estimation, gcp does not copy when the file exists, skips to the next file if occurs an error, and all the fails are written to a journal file</li>
+<li><code>pv</code> </li>
+<li></li>
+</ol>
+<h2 id="_4">参考</h2>
+<p><a href="https://www.zylk.net/en/web-2-0/blog/-/blogs/how-to-copy-files-in-linux-faster-and-safer-than-cp">https://www.zylk.net/en/web-2-0/blog/-/blogs/how-to-copy-files-in-linux-faster-and-safer-than-cp</a></p>
+<p><a href="https://unix.stackexchange.com/questions/10026/how-can-i-best-copy-large-numbers-of-small-files-over-scp">https://unix.stackexchange.com/questions/10026/how-can-i-best-copy-large-numbers-of-small-files-over-scp</a></p>
+<p><a href="https://serverfault.com/questions/18125/how-to-copy-a-large-number-of-files-quickly-between-two-servers">https://serverfault.com/questions/18125/how-to-copy-a-large-number-of-files-quickly-between-two-servers</a></p>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#tar">tar的方式</a><ul>
+<li><a href="#_1">同设备</a></li>
+<li><a href="#_2">垮网络</a></li>
+</ul>
+</li>
+<li><a href="#_3">其他工具</a><ul>
+<li><a href="#rsync">rsync</a></li>
+<li><a href="#zsync">zsync</a></li>
+<li><a href="#unison">unison</a></li>
+<li><a href="#ncftpd">ncFTPd 非开源的</a></li>
+<li><a href="#ttcp">ttcp 网络反射</a></li>
+<li><a href="#lftp">lftp</a></li>
+</ul>
+</li>
+<li><a href="#linux">其他linux命令</a></li>
+<li><a href="#_4">参考</a></li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>2022-09-18 20:23:39</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
