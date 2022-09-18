@@ -12,7 +12,7 @@ branches:
 
 install:
   - python -m pip install --upgrade pip
-  - pip install --upgrade setuptools
+  - pip install setuptools~=46.0.0
   - pip install ez_setup
   - pip install unroll
   - pip install -U git+https://github.com/drunkpig/mdwiki.git
