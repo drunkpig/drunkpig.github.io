@@ -19,7 +19,7 @@ tags: ssh
 
 
 
-```
+```shell
 $conda activate <your python env>
 # 或者使用python env也可以，我用的是conda 环境
 $pip install pproxy
