@@ -5,3 +5,5 @@
 - https://github.com/brentp/gargs
 - cluster-ssh
 - parallel-ssh
+- pqrs parquet文件查看器
+- gargs
