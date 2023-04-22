@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "source" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "source" ]
+    branches: [ "master" ]
 
 permissions:
   contents: read
@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: insall python
-    - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.7"
@@ -28,6 +27,18 @@ jobs:
         pip install -U git+https://github.com/drunkpig/mdwiki.git
         sudo snap install tree
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: build html
+        steps:
+    - uses: actions/checkout@master
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: build html Create local changes
       run: |
-        mdpub
+        mdwiki_exec ./post   .
+        echo "准备提交的编译结果如下："
+        tree
+    - name: Commit & Push changes
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        
