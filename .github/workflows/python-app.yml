@@ -28,7 +28,7 @@ jobs:
           sudo snap install tree
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: get code AT master branch
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
