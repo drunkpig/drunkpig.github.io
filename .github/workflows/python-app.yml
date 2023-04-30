@@ -33,6 +33,7 @@ jobs:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
       - run: |
+          cd /home/runner/work/drunkpig.github.io/drunkpig.github.io
           mdwiki_exec ./post   .
           echo "准备提交的编译结果如下："
           tree
