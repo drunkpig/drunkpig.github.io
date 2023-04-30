@@ -35,7 +35,7 @@ jobs:
       - run: |
           cd /home/runner/work/drunkpig.github.io/drunkpig.github.io
           tree
-          mdwiki_exec ./post   .
+          mdwiki_exec /home/runner/work/drunkpig.github.io/drunkpig.github.io/post   /home/runner/work/drunkpig.github.io/drunkpig.github.io/
           echo "准备提交的编译结果如下："
           tree
 
