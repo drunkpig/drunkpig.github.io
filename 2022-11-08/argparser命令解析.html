@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>argparser命令解析</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/code_hilighting.css" type="text/css" media="screen"
+          charset="utf-8">
+    <link rel="stylesheet" href="../css/simple.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/pages.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/mytheme.css" type="text/css" media="screen" charset="utf-8">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?ccd0a4c5305cc998d59f5c06a24a2b93";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="article_title">argparser命令解析</h1>
+            <div class="tags_container">
+                
+                <span>标签：</span>
+                
+                <a class="tag" href="../tags/tag_python.html">python</a>
+                
+                <a class="tag" href="../tags/tag_argparse.html">argparse</a>
+                
+                
+            </div>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
+            <div class="toc">
+<ul>
+<li><a href="#argparse">argparse 命令行解析</a><ul>
+<li><a href="#1">例1</a></li>
+<li><a href="#argumentparser">ArgumentParser对象的创建</a></li>
+<li><a href="#add_argument">add_argument()方法参数</a></li>
+<li><a href="#_1">互斥</a></li>
+<li><a href="#_2">分组</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2 id="argparse">argparse 命令行解析</h2>
+<h3 id="1">例1</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+                    <span class="n">prog</span> <span class="o">=</span> <span class="s1">&#39;ProgramName&#39;</span><span class="p">,</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;What the program does&#39;</span><span class="p">,</span>
+                    <span class="n">epilog</span> <span class="o">=</span> <span class="s1">&#39;Text at the bottom of help&#39;</span><span class="p">)</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>           <span class="c1"># positional argument</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--count&#39;</span><span class="err">，</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COUNT&#39;</span><span class="p">)</span>      <span class="c1"># option that takes a value</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span>
+                    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>  <span class="c1"># on/off flag</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>输出</p>
+<div class="codehilite"><pre><span></span><code><span class="o">(</span>dsdl-sdk<span class="o">)</span> PS D:<span class="se">\w</span>orkspace<span class="se">\s</span>3utils&gt; python main.py -h
+usage: ProgramName <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-c COUNT<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> filename
+What the program does
+positional arguments:
+  filename
+options:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  -c COUNT, --count COUNT
+  -v, --verbose
+Text at the bottom of <span class="nb">help</span>
+</code></pre></div>
+
+
+<p>可见使用argparse一共3个步骤</p>
+<ol>
+<li>
+<p>创建ArgumentParser对象</p>
+</li>
+<li>
+<p>利用add_argument()方法增加命令选项， 对选项做一些有必要的互斥、默认值等设置</p>
+</li>
+<li>
+<p>调用parse_args()解析参数，得到一个Namescape对象</p>
+</li>
+</ol>
+<h3 id="argumentparser">ArgumentParser对象的创建</h3>
+<ul>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#prog">prog</a> - 程序的名称 (默认值: <code>os.path.basename(sys.argv[0])</code>)</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#usage">usage</a> - 描述程序用途的字符串（默认值：从添加到解析器的参数生成）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#description">description</a> - Text to display before the argument help (by default, no text)</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#epilog">epilog</a> - Text to display after the argument help (by default, no text)</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#parents">parents</a> - 一个 <a href="https://docs.python.org/zh-cn/3/library/argparse.html#argparse.ArgumentParser"><code>ArgumentParser</code></a> 对象的列表，它们的参数也应包含在内</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#formatter-class">formatter_class</a> - 用于自定义帮助文档输出格式的类</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#prefix-chars">prefix_chars</a> - 可选参数的前缀字符集合（默认值： '-'）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#fromfile-prefix-chars">fromfile_prefix_chars</a> - 当需要从文件中读取其他参数时，用于标识文件名的前缀字符集合（默认值： <code>None</code>）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#argument-default">argument_default</a> - 参数的全局默认值（默认值： <code>None</code>）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#conflict-handler">conflict_handler</a> - 解决冲突选项的策略（通常是不必要的）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#add-help">add_help</a> - 为解析器添加一个 <code>-h/--help</code> 选项（默认值： <code>True</code>）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#allow-abbrev">allow_abbrev</a> - 如果缩写是无歧义的，则允许缩写长选项 （默认值：<code>True</code>）</li>
+<li><a href="https://docs.python.org/zh-cn/3/library/argparse.html#exit-on-error">exit_on_error</a> - 决定当错误发生时是否让 ArgumentParser 附带错误信息退出。 (默认值: <code>True</code>)</li>
+</ul>
+<h3 id="add_argument">add_argument()方法参数</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+<th align="left">Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#action">action</a></td>
+<td align="left">Specify how an argument should be handled</td>
+<td align="left"><code>'store'</code>, <code>'store_const'</code>, <code>'store_true'</code>, <code>'append'</code>, <code>'append_const'</code>, <code>'count'</code>, <code>'help'</code>, <code>'version'</code></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#choices">choices</a></td>
+<td align="left">限定参数值取值范围</td>
+<td align="left"><code>['foo', 'bar']</code>, <code>range(1, 10)</code>, or <a href="https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Container"><code>Container</code></a> instance</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#const">const</a></td>
+<td align="left">Store a constant value</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#default">default</a></td>
+<td align="left">默认值</td>
+<td align="left">Defaults to <code>None</code></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#dest">dest</a></td>
+<td align="left">例如add_argument里用的 --name, 想在程序里用 myname</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#help">help</a></td>
+<td align="left">Help message for an argument</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#metavar">metavar</a></td>
+<td align="left">打印usage的时候参数的默认值</td>
+<td align="left">仅在显示层面替换，dest在code的变量层面替换</td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#nargs">nargs</a></td>
+<td align="left">参数可取的个数</td>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/functions.html#int"><code>int</code></a>, <code>'?'</code>, <code>'*'</code>, <code>'+'</code>, or <code>argparse.REMAINDER</code></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#required">required</a></td>
+<td align="left">Indicate whether an argument is required or optional</td>
+<td align="left"><code>True</code> or <code>False</code></td>
+</tr>
+<tr>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/argparse.html#type">type</a></td>
+<td align="left">Automatically convert an argument to the given type</td>
+<td align="left"><a href="https://docs.python.org/zh-cn/3/library/functions.html#int"><code>int</code></a>, <a href="https://docs.python.org/zh-cn/3/library/functions.html#float"><code>float</code></a>, <code>argparse.FileType('w')</code>, or callable function</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_1">互斥</h3>
+<h3 id="_2">分组</h3>
+
+        </div>
+        <div class="mytoc col-lg-2 col-md-2 col-xs-2 col-md-2">
+            <span class="toc_title">目录</span>
+            <div class="toc">
+<ul>
+<li><a href="#argparse">argparse 命令行解析</a><ul>
+<li><a href="#1">例1</a></li>
+<li><a href="#argumentparser">ArgumentParser对象的创建</a></li>
+<li><a href="#add_argument">add_argument()方法参数</a></li>
+<li><a href="#_1">互斥</a></li>
+<li><a href="#_2">分组</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+        </div>
+    </div>
+    <div class="row">
+        <script src="https://utteranc.es/client.js"
+        repo="drunkpig/drunkpig.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+        </script>
+    </div>
+</div>
+
+
+
+
+
+<div class="container">
+    <div class="row text-center">
+	build:&nbsp;&nbsp; <a target='_blank' href='https://travis-ci.com/github/drunkpig/drunkpig.github.io'>__BUILD_VERSION__</a>
+	
+	</div>
+</div>
+
+</body>
+</html>
