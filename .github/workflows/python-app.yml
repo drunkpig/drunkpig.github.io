@@ -35,6 +35,7 @@ jobs:
       - run: |
           pwd
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
+          find /home/runner/work/drunkpig.github.io/drunkpig.github.io -mindepth 1 -path /home/runner/work/drunkpig.github.io/drunkpig.github.io/post -prune -o -exec rm -rf {} +
           mdwiki_exec /home/runner/work/drunkpig.github.io/drunkpig.github.io/post   /home/runner/work/drunkpig.github.io/drunkpig.github.io/
           echo "准备提交的编译结果如下："
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
