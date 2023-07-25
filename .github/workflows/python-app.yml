@@ -40,7 +40,7 @@ jobs:
           rm -rf image
           rm -rf js
           rm -rf *.html
-          mdwiki_exec /home/runner/work/drunkpig.github.io/drunkpig.github.io/post   /home/runner/work/drunkpig.github.io/drunkpig.github.io/html/
+          mdwiki_exec ./post   ./
           echo "准备提交的编译结果如下："
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
 
