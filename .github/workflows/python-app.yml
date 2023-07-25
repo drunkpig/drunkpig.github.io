@@ -47,11 +47,9 @@ jobs:
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
     
       - name: Commit & Push changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: compile and commit
-          commit_user_name: GH-Action
-          commit_user_email: kernel.h@qq.com
-          commit_author: drunkpig <kernel.h@qq.com>
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'Your Name'
+          git config --global user.email 'your-username@users.noreply.github.com'
+          git commit -am "Automated report"
+          git push
 
