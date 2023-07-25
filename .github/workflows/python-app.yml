@@ -48,8 +48,8 @@ jobs:
     
       - name: Commit & Push changes
         run: |
-          git config --global user.name 'Your Name'
-          git config --global user.email 'your-username@users.noreply.github.com'
+          git config --global user.name 'drunkpig'
+          git config --global user.email 'kernel.h@qq.com'
           git commit -am "Automated report"
           git push
 
