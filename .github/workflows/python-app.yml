@@ -46,10 +46,6 @@ jobs:
           echo "准备提交的编译结果如下："
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
     
-      - name: Commit & Push changes
-        run: |
-          git config --global user.name 'drunkpig'
-          git config --global user.email 'kernel.h@qq.com'
-          git commit -am "Automated report"
-          git push
+      - uses: stefanzweifel/git-auto-commit-action@v4
+
 
