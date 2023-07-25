@@ -46,6 +46,13 @@ jobs:
           echo "准备提交的编译结果如下："
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
     
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: deploy
+        env:
+          MY_EMAIL: kernel.h@gmail.com
+          MY_NAME: drunkpig
+        run: |
+          git config --global user.email $MY_EMAIL
+          git config --global user.name $MY_NAME
+          git remote set-url origin https://$MY_NAME:${{ secrets.GH_SECRET }}@github.com/drunkpig/drunkpig.github.io
 
 
