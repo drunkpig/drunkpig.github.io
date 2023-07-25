@@ -50,5 +50,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: compile and commit
+          commit_user_name: GH-Action
+          commit_user_email: kernel.h@qq.com
+          commit_author: drunkpig <kernel.h@qq.com>
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
