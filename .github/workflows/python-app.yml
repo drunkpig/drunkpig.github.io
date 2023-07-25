@@ -16,6 +16,8 @@ jobs:
   setupenv:
     name: setup-env
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: insall python
         uses: actions/setup-python@v3
@@ -43,9 +45,10 @@ jobs:
           mdwiki_exec ./post   ./
           echo "准备提交的编译结果如下："
           ls -ltR /home/runner/work/drunkpig.github.io/drunkpig.github.io
-
+    
       - name: Commit & Push changes
-        uses: actions-js/push@master
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
+          commit_message: compile and commit
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
