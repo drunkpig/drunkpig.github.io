@@ -53,7 +53,7 @@ jobs:
         run: |
           git config --global user.email $MY_EMAIL
           git config --global user.name $MY_NAME
-          git remote set-url origin https://$MY_NAME:${{ secrets.GH_SECRET }}@github.com/drunkpig/drunkpig.github.io
+          git remote set-url origin https://$MY_NAME:${{ secrets.GITHUB_TOKEN }}@github.com/drunkpig/drunkpig.github.io
           git push origin master
 
 
