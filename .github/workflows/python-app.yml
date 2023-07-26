@@ -58,5 +58,6 @@ jobs:
           git add .
           git commit -m"compile and deploy"
           git push origin master
+          ls -lt
 
 
