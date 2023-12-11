@@ -51,17 +51,20 @@
         <div class="post_content col-lg-10 col-md-10 col-xs-10 col-md-10">
             <h1 id="r8000">R8000路由器梅林小记</h1>
 <h2 id="_1">问题</h2>
-<p>我想用几个号之间互相看视频得奖励。首先要做好安全问题，就要做到：
-1. 20个手机都要上网
-2. 手机与手机之间不能网络互通
-3. 每个手机都有一个独立的公网ip
-4. 成本足够低，复用一条家庭带宽</p>
+<p>我想用几个号之间互相看视频得奖励。首先要做好安全问题，就要做到：</p>
+<ol>
+<li>20个手机都要上网</li>
+<li>手机与手机之间不能网络互通</li>
+<li>每个手机都有一个独立的公网ip</li>
+<li>成本足够低，复用一条家庭带宽</li>
+</ol>
 <h2 id="_2">解决办法</h2>
 <h3 id="20">20个手机一起上网</h3>
 <p>这个比较好办，土豪用流量卡，屌丝用OTG三合一线。
 不知道OTG三合一是啥的看这里 <a href="https://detail.1688.com/offer/672826327296.html">https://detail.1688.com/offer/672826327296.html</a>
 或者 <a href="https://item.taobao.com/item.htm?spm=a21n57.1.0.0.293b523c45hWyf&amp;id=668795725656&amp;ns=1&amp;abbucket=1#detail">https://item.taobao.com/item.htm?spm=a21n57.1.0.0.293b523c45hWyf&amp;id=668795725656&amp;ns=1&amp;abbucket=1#detail</a></p>
-<p>USB供电有专门的多口USB供电，但是要注意一定要usb扩展而不是仅仅充电的。USB扩展配件可以参考这个：<a href="https://detail.tmall.com/item.htm?ali_refid=a3_420434_1006:1106460419:N:+5e3tIOIUlznRm9uzqVoNg==:f146ad95fc30402c3e0afd7717cfea6a&amp;ali_trackid=1_f146ad95fc30402c3e0afd7717cfea6a&amp;id=540858197451&amp;spm=a21n57.1.0.0&amp;sku_properties=148242406:21516">https://detail.tmall.com/item.htm?ali_refid=a3_420434_1006:1106460419:N:+5e3tIOIUlznRm9uzqVoNg==:f146ad95fc30402c3e0afd7717cfea6a&amp;ali_trackid=1_f146ad95fc30402c3e0afd7717cfea6a&amp;id=540858197451&amp;spm=a21n57.1.0.0&amp;sku_properties=148242406:21516</a></p>
+<p>USB供电有专门的多口USB供电，但是要注意一定要usb扩展而不是仅仅充电的,USB扩展可以通过USB控制传输数据，如果你只需要通过网络控制那可以忽略。
+USB扩展配件可以参考这个：<a href="https://detail.tmall.com/item.htm?ali_refid=a3_420434_1006:1106460419:N:+5e3tIOIUlznRm9uzqVoNg==:f146ad95fc30402c3e0afd7717cfea6a&amp;ali_trackid=1_f146ad95fc30402c3e0afd7717cfea6a&amp;id=540858197451&amp;spm=a21n57.1.0.0&amp;sku_properties=148242406:21516">https://detail.tmall.com/item.htm?ali_refid=a3_420434_1006:1106460419:N:+5e3tIOIUlznRm9uzqVoNg==:f146ad95fc30402c3e0afd7717cfea6a&amp;ali_trackid=1_f146ad95fc30402c3e0afd7717cfea6a&amp;id=540858197451&amp;spm=a21n57.1.0.0&amp;sku_properties=148242406:21516</a></p>
 <h3 id="_3">手机之间网络不互通</h3>
 <p>这个需要用到软路由了。当手机连到同一个路由器，那么我需要在路由器的iptable上设置好手机用的网段的几个IP不能互访即可。</p>
 <blockquote>
@@ -75,7 +78,7 @@
 <li>手机卡流量，路由器只组局域网进行控制用</li>
 </ol>
 <h2 id="_4">成本问题</h2>
-<p>这个问题我是采用了服用家里的100M的电信宽带。嗯这里面有许多内容，不是这里可以说的。</p>
+<p>这个问题我是采用了服用家里的100M的电信宽带。细节忽略。</p>
 <h3 id="_5">上面讲述的方案的拓扑图</h3>
 <p>以上是理论上的，根据这个理论上的东西会玩的可以做很多改动。当然我自己会玩，我可以把我的方案放下面，成本绝对最低。硬件投入最少。</p>
 <h2 id="_6">我的方案</h2>
