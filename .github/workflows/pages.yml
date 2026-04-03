@@ -2,9 +2,9 @@ name: Build and Deploy Pages
 
 on:
   push:
-    branches: ["master", "source"]
+    branches: ["master"]
   pull_request:
-    branches: ["master", "source"]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
