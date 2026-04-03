@@ -1,3 +1,4 @@
 {
-  "goatcounter_script": "<script data-goatcounter=\"https://drunkpig.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
+  "goatcounter_script": "<script data-goatcounter=\"https://drunkpig.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>",
+  "source_markdown_base_url": "https://raw.githubusercontent.com/drunkpig/drunkpig.github.io/master/post"
 }
