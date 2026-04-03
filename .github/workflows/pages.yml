@@ -1,0 +1,64 @@
+name: Build and Deploy Pages
+
+on:
+  push:
+    branches: ["master", "source"]
+  pull_request:
+    branches: ["master", "source"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install mdwiki
+        run: |
+          python -m pip install --upgrade pip
+          pip install "git+https://github.com/drunkpig/mdwiki.git@21fd36072251cde0c68d3b9210ec24fcfbfb2f51"
+
+      - name: Build site
+        run: |
+          rm -rf dist
+          mdwiki_exec ./post ./dist
+          if [ -f CNAME ]; then cp CNAME dist/CNAME; elif [ -f post/CNAME ]; then cp post/CNAME dist/CNAME; fi
+          touch dist/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./dist
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
