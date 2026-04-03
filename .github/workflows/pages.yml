@@ -67,7 +67,7 @@ jobs:
       - name: Install mdwiki
         run: |
           python -m pip install --upgrade pip
-          pip install "git+https://github.com/drunkpig/mdwiki.git@230139f"
+          pip install "https://files.pythonhosted.org/packages/92/41/4aaba39982102f266555479caebf5739ee9edbdd1b0b8bcef1ba1e0804c3/mdwiki-0.3.7-py3-none-any.whl"
           mdwiki_exec --version
 
       - name: Build site
