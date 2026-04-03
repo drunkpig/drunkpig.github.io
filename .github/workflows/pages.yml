@@ -35,8 +35,8 @@ jobs:
       - name: Install mdwiki
         run: |
           python -m pip install --upgrade pip
-          pip install "mdwiki==0.3.2"
-          mdwiki_exec --help
+          pip install "mdwiki==0.3.3"
+          mdwiki_exec --version
 
       - name: Build site
         run: |
