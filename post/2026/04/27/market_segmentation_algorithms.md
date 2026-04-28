@@ -9,6 +9,9 @@
 > - [`celue/beast_turning.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/beast_turning.py) — BEAST 季度变点检测
 > - [`celue/psimpl_turning.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/psimpl_turning.py) — 最早的 PD / RW 单算法实验
 > - [`celue/psimpl_tol_compare.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/psimpl_tol_compare.py) — RW 不同 tol 值的粒度对比
+> - [`celue/zigzag_chan_compare.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/zigzag_chan_compare.py) — ZigZag + 缠论笔（番外篇）
+> - [`celue/rw_corridor_plot.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/rw_corridor_plot.py) — RW 单算法 + 走廊可视化
+> - [`celue/rw_advanced_plot.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/rw_advanced_plot.py) — RW 自适应 tol + 跨周期联动（带走廊开关）
 
 ---
 
@@ -46,6 +49,10 @@
 | 8 | **Douglas-Peucker-N** | DP 变体，限制最多保留 N 个点 | ❌ 离线 | ✅ |
 | 9 | **Visvalingam-Whyatt (VW)** | 按**三角形面积**排序，面积小的点删掉 | ❌ 离线 | ✅ |
 | 10 | **BEAST**          | 贝叶斯 MCMC 变点模型 | ❌ 离线 | ✅（对照） |
+| 11 | **ZigZag**         | 相对极值 + 回撤百分比阈值触发翻转 | ✅ | ✅（番外） |
+| 12 | **缠论笔**         | 包含关系处理 + 3-bar 分型 + 笔有效性 | ✅ | ✅（番外） |
+
+> ⚠️ 11/12 不属于 psimpl 折线简化家族，但在技术分析圈广泛使用，作为番外一并对比。
 
 ### 在线 / 离线 对比
 
@@ -61,6 +68,8 @@
 | Douglas-Peucker  | ❌ | — | — | 简单 | ❌（需整段） |
 | DP-N             | ❌ | — | — | 简单（点数） | ❌（需整段） |
 | Visvalingam-Whyatt | ❌ | — | — | 简单（面积或点数） | ❌（需整段） |
+| ZigZag           | ✅ | ✅ 永不改写 | 回撤≥δ 才触发 | 简单（只有一个 %） | ✅ |
+| 缠论笔           | ✅ | ✅ 笔一旦确认稳定 | 1~数根 bar | 中（包含规则+最小间隔） | ✅ |
 
 ---
 
@@ -170,6 +179,14 @@ dist = sqrt((i - last_x)^2 + (prices[i] - last_y)^2)
 
 ![RW 9月大涨](market_seg/30m_rw_2024-09-18_2024-10-11.png)
 
+**走廊可视化**（便于直观理解 tol 的作用）——每段锚点→锚点+1 的方向延伸出橙色中轴（点线），蓝色虚线是 ±tol 走廊边界，冲出蓝线就是新锚点：
+
+![RW 走廊 9月大涨](market_seg/30m_rw_corridor_2024-09-18_2024-10-11.png)
+
+![RW 走廊 1月暴跌+2月反弹](market_seg/30m_rw_corridor_2024-01-15_2024-02-08.png)
+
+![RW 走廊 7月下跌](market_seg/30m_rw_corridor_2024-07-15_2024-08-07.png)
+
 **用于选股场景的评估**：
 
 | 维度 | 结论 |
@@ -180,6 +197,58 @@ dist = sqrt((i - last_x)^2 + (prices[i] - last_y)^2)
 | **能做大盘跟随信号吗？** | **✅ 可以，本文首选** |
 
 **原因**：算法数学上保证"锚点前移后永不回溯"——一旦某个 bar 被标记为转折点，无论后面来多少新数据都不会撤销。唯一的不确定性在"当前走廊"里最新那段，但这对交易而言也合理：新趋势段要等到它真正形成（下一根 bar 冲出走廊）才能确认。30 分钟的确认延迟对日内跟随策略完全可接受。
+
+---
+
+#### 4.1 进阶改进一：tol 自适应（按百分比）
+
+`tol=10` 这个硬编码数字只适合上证指数 3000 点附近。换成个股 50 元、或者指数涨到 5000 点、或者转场到美股 S&P 500，都要手工调。**自适应方案**：把 `tol` 直接绑定到 close 的百分比——例如 `tol[i] = close[i] × 0.3%`。大盘涨到 3300 时走廊约 ±9.9，跌到 2700 时 ±8.1，自动随量级缩放。
+
+**统一接口**（`celue/psimpl_all_algos.py:reumann_witkam`）：
+
+```python
+def reumann_witkam(prices, tol=None, *, pct=None):
+    """
+    tol 和 pct 两种方式指定走廊半宽，tol 优先。
+      - tol: 标量或 array[n]（指数点）
+      - pct: close 的百分比，tol[i] = prices[i] × pct
+    """
+    ...
+```
+
+**三段窗口对比图（固定 tol=10 vs 自适应 0.3%，带严格走廊）**：
+
+![RW 自适应 9月大涨](market_seg/30m_rw_adaptive_corridor_2024-09-18_2024-10-11.png)
+
+![RW 自适应 1月暴跌+2月反弹](market_seg/30m_rw_adaptive_corridor_2024-01-15_2024-02-08.png)
+
+![RW 自适应 7月下跌](market_seg/30m_rw_adaptive_corridor_2024-07-15_2024-08-07.png)
+
+在 2024 年指数 2700~3300 这个量级，两者段数差别很小；真正体现价值要等价格量级变化或跨品种。
+
+**走廊画法（严格版）**：图上虚线不是简单的"价格 ±tol"——RW 算法在 (bar_idx, price) 空间检查垂直距离 ≤ tol，等价于价格方向上 `|prices[j] − y_center(j)| ≤ tol·√(1+dy²)`。所以有斜率的段，虚线到中轴的价格距离 > tol，斜率越大走廊越宽。这样画出来 K 线收盘价冲出虚线的那一刻，就是算法实际标转折点的那一刻。
+
+---
+
+#### 4.2 进阶改进二：跨周期联动（5m / 15m / 30m）
+
+缠论的"级别联立"思想可以直接移植到 RW——同一窗口同时跑 5m、15m、30m 三个级别，用**同一个** `pct=0.3%` 自适应阈值，产出的段密度递减（5m 最密、30m 最稀疏），三个级别方向一致的时刻就是大盘最强单方向信号。
+
+共享 x 轴用"交易分钟索引"（每天 240 分钟紧凑编号，跳过夜里/周末/午休），三个子图在时间上精确对齐。
+
+![跨周期 9月大涨](market_seg/multi_rw_corridor_2024-09-18_2024-10-11.png)
+
+![跨周期 1月暴跌+2月反弹](market_seg/multi_rw_corridor_2024-01-15_2024-02-08.png)
+
+![跨周期 7月下跌](market_seg/multi_rw_corridor_2024-07-15_2024-08-07.png)
+
+**用法**：
+
+- **强信号**：5m/15m/30m 三个级别方向一致 → 最高确定性，适合主趋势跟随
+- **背离**：5m 向下但 30m 还向上 → 小级别回调，大级别未破 → 通常是短线买入/加仓机会
+- **转折先兆**：30m 快要冲出走廊但 5m 已经反向数段 → 大级别即将确认转向
+
+源代码：[`celue/rw_advanced_plot.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/rw_advanced_plot.py) —— 两个 plot 函数都支持 `(tol=None, pct=None, show_corridor=False)` 参数，tol 优先。
 
 ---
 
@@ -348,11 +417,169 @@ cp_prob = o.trend.cpOccPr  # 每个点的变点概率
 
 ---
 
+## 番外：ZigZag 与缠论笔
+
+psimpl 家族是通用**折线简化**算法，用价格作为"折线的 y 值"。但技术分析圈还有两个经常被拿来做转折点检测的方法：**ZigZag** 和**缠论**。它们不做"简化折线"，而是直接定义"什么算转折"——所以思路和 psimpl 那九个不完全对齐，单独列一章。
+
+实现位置：[`celue/zigzag_chan_compare.py`](https://github.com/drunkpig/tdx-signal-viewer/blob/main/celue/zigzag_chan_compare.py)（两个算法都是几十行的纯 Python 内联实现，方便对比阅读；生产级的多周期联立/中枢/走势可以直接用 [waditu/czsc](https://github.com/waditu/czsc) 或 [Vespa314/chan.py](https://github.com/Vespa314/chan.py)）。
+
+### 同窗口对比图
+
+![ZigZag vs 缠论 2024年9月底大涨](market_seg/30m_ZIGZAG_CHAN_compare_2024-09-18_2024-10-11.png)
+
+![ZigZag vs 缠论 2024年1月暴跌+2月反弹](market_seg/30m_ZIGZAG_CHAN_compare_2024-01-15_2024-02-08.png)
+
+![ZigZag vs 缠论 2024年7月下跌](market_seg/30m_ZIGZAG_CHAN_compare_2024-07-15_2024-08-07.png)
+
+---
+
+### 11. ZigZag（百分比回撤）
+
+**思路**：最老派的摆动点指示器，只有一个百分比阈值 δ。
+
+1. 起始点为锚点，方向未定
+2. 新 bar 来：
+   - 若方向 up：价格创新高 → 更新锚点；否则若回撤 ≥ δ → 前锚点确认为顶，翻转为 down
+   - 若方向 down：对称逻辑
+3. 只有翻转那一刻才输出新转折点（并把新极值作为新锚点）
+
+```python
+def zigzag_pivots(prices, up_thresh=0.03, down_thresh=-0.03):
+    n = len(prices); pivots = [0]
+    last_p, last_i, trend = prices[0], 0, 0
+    for i in range(1, n):
+        p = prices[i]
+        if trend >= 0:
+            if p > last_p: last_p, last_i = p, i
+            elif (p / last_p - 1) <= down_thresh:
+                if pivots[-1] != last_i: pivots.append(last_i)
+                trend, last_p, last_i = -1, p, i
+        if trend <= 0:
+            if p < last_p: last_p, last_i = p, i
+            elif (p / last_p - 1) >= up_thresh:
+                if pivots[-1] != last_i: pivots.append(last_i)
+                trend, last_p, last_i = +1, p, i
+    if pivots[-1] != n - 1: pivots.append(n - 1)
+    return pivots
+```
+
+- **参数**：上/下回撤阈值 up_thresh / down_thresh（本文都设为 ±1.5%）
+
+![ZigZag 9月大涨](market_seg/30m_zigzag_2024-09-18_2024-10-11.png)
+
+**用于选股场景的评估**：
+
+| 维度 | 结论 |
+|---|---|
+| 需要未来数据？ | ❌ 不需要，严格在线 O(n) |
+| 新 bar 会改写历史转折？ | ❌ **不会**，已确认极值永不回溯 |
+| 确认延迟 | 取决于回撤达成时间（不固定，可能几根 bar 也可能十几根） |
+| **能做大盘跟随信号吗？** | **✅ 可以** |
+
+**和 RW 的本质区别**：
+
+| 维度 | Reumann-Witkam | ZigZag |
+|---|---|---|
+| 触发条件 | 点到走廊中轴**垂距** > tol（绝对距离） | 从极值**相对回撤** ≥ δ（百分比） |
+| 参数单位 | 指数点 | % |
+| 尺度适应 | 股价 5 元和 500 元用同 tol 不合理 | δ 是百分比，跨股自适应 |
+| 确认延迟 | 冲出走廊的 1 根 bar | 回撤到 δ 的那根 bar，可能更晚 |
+
+**结论**：ZigZag 本质上是 "RW 的百分比版本"。做 A 股大盘（指数点数量级固定）差别不大；做跨股票、跨资产通用信号时 ZigZag 更省事——阈值直接用 2% 就能统一处理大小盘。缺点是**触发延迟不固定**：一波慢涨可能很久不回撤 δ，确认点就一直悬着。
+
+---
+
+### 12. 缠论笔（分型 + 包含关系 + 笔有效性）
+
+**思路**：缠论不是一个算法，是一套流水线。最小可用的"笔"识别由 3 步组成：
+
+1. **包含关系处理**：若相邻两根 K 线互相完全包含，根据**之前的方向**合并成一根（上行取高高、下行取低低）
+2. **分型识别**：处理后的 3 根连续 bar 中，中间那根的 high 最高且 low 最高 → **顶分型**；反之 → **底分型**
+3. **笔有效性**：两个分型要构成一笔，必须**类型相反**且**中间至少隔 3 根合并后 bar**（防止分型扎堆导致的假笔）
+
+```python
+def chanlun_bi(highs, lows):
+    # step1: 包含关系处理（上行取高高、下行取低低）
+    merged, direction = [], 0
+    for i in range(len(highs)):
+        h, l = highs[i], lows[i]
+        if not merged: merged.append((i, h, l)); continue
+        pi, ph, pl = merged[-1]
+        if (ph >= h and pl <= l) or (ph <= h and pl >= l):
+            if direction >= 0:
+                merged[-1] = (i if h >= ph else pi, max(ph, h), max(pl, l))
+            else:
+                merged[-1] = (i if l <= pl else pi, min(ph, h), min(pl, l))
+        else:
+            direction = +1 if (h > ph and l > pl) else (-1 if h < ph and l < pl else direction)
+            merged.append((i, h, l))
+    # step2: 3-bar 分型
+    fxs = []
+    for k in range(1, len(merged) - 1):
+        pi, ph, pl = merged[k-1]; ci, ch, cl = merged[k]; ni, nh, nl = merged[k+1]
+        if ch > ph and ch > nh and cl > pl and cl > nl: fxs.append((k, ci, ch, 'top'))
+        elif ch < ph and ch < nh and cl < pl and cl < nl: fxs.append((k, ci, cl, 'bot'))
+    # step3: 笔（异类型 + 间隔≥3）
+    bi = []
+    for fx in fxs:
+        if not bi: bi.append(fx); continue
+        if bi[-1][3] == fx[3]:
+            if (fx[3]=='top' and fx[2]>bi[-1][2]) or (fx[3]=='bot' and fx[2]<bi[-1][2]):
+                bi[-1] = fx
+        elif fx[0] - bi[-1][0] >= 3:
+            bi.append(fx)
+    return bi
+```
+
+- **参数**：基本无参（严格缠论定义）。若想放松可调分型间隔（3→2）或加价差阈值
+
+![缠论笔 9月大涨](market_seg/30m_chanlun_2024-09-18_2024-10-11.png)
+
+**用于选股场景的评估**：
+
+| 维度 | 结论 |
+|---|---|
+| 需要未来数据？ | ❌ 分型需要后一根 bar 确认（延迟 1 根） |
+| 新 bar 会改写历史转折？ | ⚠️ **最后 1 笔可能延伸或撤销**，更早的笔稳定 |
+| 确认延迟 | 1~数根 bar（需等分型 + 笔间隔达 3） |
+| **能做大盘跟随信号吗？** | **✅ 可以（限于分型+笔层面，再往上不稳定）** |
+
+**为什么缠论比 RW 慢得多？**
+
+如果只是上面这 3 步，复杂度也是 O(n)——慢不在这里。慢在**层级**：
+
+| 缠论层级 | 本文实现？ | 新 bar 来了会发生什么 |
+|---|---|---|
+| 合并后 bar | ✅ | 仅最末一根可能改 |
+| 分型 | ✅ | 仅末端分型可能撤销 |
+| **笔** | ✅ | 最后 1 笔可能延伸或撤销 |
+| 段 | ❌ | 最后 1 段可能重划，要回算特征序列 |
+| 中枢 | ❌ | 最后中枢可能扩张、新增、解体 |
+| 走势类型 | ❌ | 一路向上回溯 |
+
+**每上一层，新 bar 触发回溯的概率和范围都变大**。严格的缠论实现（如 czsc / chan.py）是多层联动的状态机，每次更新都要穿透 6 层，实测 python 在 30m × 数千根 bar 上分型层 <1s，但全链路（含段+中枢）量级到秒。RW / ZigZag 是**单层** O(n) 扫描，差距从"单层状态机"对比"多层状态机"看最直观。
+
+**和 ZigZag 的关键差别**：
+
+| 维度 | ZigZag | 缠论笔 |
+|---|---|---|
+| 基础数据 | close（一维序列） | high/low（二维包含关系） |
+| 参数 | 百分比阈值 | 几乎无参（只有笔间隔） |
+| 极值判定 | 相对回撤触发 | 3 根窗口局部极值（形态判定） |
+| 顶底语义 | 仅位置，无语义 | 明确标注**顶/底分型** |
+| 后续结构 | 无 | 可往上接段/中枢/走势 |
+
+**结论**：如果你只要"把 K 线分成涨段跌段"，ZigZag 和 RW 二选一就够了；如果你后面想做级别联立（比如"日线顶背驰 + 30m 三笔下跌 + 5m 底分型"），那就得走缠论这套体系——前期建议直接用 [waditu/czsc](https://github.com/waditu/czsc)（4900★，生态最全）或 [Vespa314/chan.py](https://github.com/Vespa314/chan.py)（1700★，MIT 协议，代码清爽好裁剪），不要自己从零造轮子。
+
+---
+
 ## 结论与选型
 
 | 场景 | 推荐算法 | 理由 |
 |---|---|---|
 | **实盘趋势跟随**（如大盘 30m 方向过滤器） | **Reumann-Witkam** | 最简单、延迟 1 bar、转折点稳定 |
+| **跨品种 / 跨尺度通用信号** | **ZigZag** | 百分比阈值自适应股价量级，RW 的"相对版本" |
+| **需要级别联立 / 顶底语义的选股** | **缠论笔**（建议直接用 czsc / chan.py） | 自带顶/底标签、可往上接段/中枢/走势 |
 | **实盘但需更精细**（震荡行情） | **Opheim** / **Lang** | RW 加强版，控制最大段长 |
 | **实盘第一道降噪** | **Radial Distance** | O(n)、无偏好、可作为预处理 |
 | **事后复盘 / 回测打标签** | **Douglas-Peucker** | 段质量最高 |
@@ -378,3 +605,6 @@ cp_prob = o.trend.cpOccPr  # 每个点的变点概率
 - **BEAST 项目**：<https://github.com/zhaokg/Rbeast>
 - **BEAST 论文**：Zhao K. et al. (2019). *Detecting change-point, trend, and seasonality in satellite time series data to track abrupt changes and nonlinear dynamics: A Bayesian ensemble algorithm*. Remote Sensing of Environment.
 - **折线简化综述**：Shi W., Cheung C. (2006). *Performance evaluation of line simplification algorithms for vector generalization*. The Cartographic Journal.
+- **ZigZag（Python 经典实现）**：<https://github.com/jbn/ZigZag>（BSD-3，474★；包含 Cython 扩展无预编译 wheel，如果 pip 装不上建议直接用本文内联版本）
+- **czsc（缠中说禅量化工具）**：<https://github.com/waditu/czsc>（4900★，生态最全）
+- **chan.py（开放式缠论 Python 框架）**：<https://github.com/Vespa314/chan.py>（1700★，MIT）
